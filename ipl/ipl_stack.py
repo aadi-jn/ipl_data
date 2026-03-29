@@ -1,10 +1,14 @@
 from aws_cdk import (
+    Duration,
     Stack,
     RemovalPolicy,
     CfnOutput,
     aws_s3 as s3,
     aws_glue as glue,
     aws_athena as athena,
+    aws_lambda as lambda_,
+    aws_iam as iam,
+    aws_apigateway as apigw,
 )
 from constructs import Construct
 
@@ -129,6 +133,128 @@ class IplStack(Stack):
         )
 
         # -------------------------------------------------------
+        # Lambda — ipl-query-runner
+        # -------------------------------------------------------
+
+        query_runner_role = iam.Role(
+            self, "QueryRunnerRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name(
+                    "service-role/AWSLambdaBasicExecutionRole"
+                ),
+            ],
+        )
+
+        # Athena: run queries and read results
+        query_runner_role.add_to_policy(iam.PolicyStatement(
+            actions=[
+                "athena:StartQueryExecution",
+                "athena:GetQueryExecution",
+                "athena:GetQueryResults",
+                "athena:StopQueryExecution",
+                "athena:GetWorkGroup",
+            ],
+            resources=[
+                f"arn:aws:athena:{self.region}:{self.account}:workgroup/ipl-workgroup",
+            ],
+        ))
+
+        # S3: read processed data + write/read Athena results
+        query_runner_role.add_to_policy(iam.PolicyStatement(
+            actions=["s3:GetObject", "s3:ListBucket"],
+            resources=[
+                processed_bucket.bucket_arn,
+                f"{processed_bucket.bucket_arn}/*",
+            ],
+        ))
+        query_runner_role.add_to_policy(iam.PolicyStatement(
+            actions=[
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:GetBucketLocation",
+                "s3:AbortMultipartUpload",
+            ],
+            resources=[
+                athena_results_bucket.bucket_arn,
+                f"{athena_results_bucket.bucket_arn}/*",
+            ],
+        ))
+
+        # Glue: read catalog
+        query_runner_role.add_to_policy(iam.PolicyStatement(
+            actions=[
+                "glue:GetDatabase",
+                "glue:GetDatabases",
+                "glue:GetTable",
+                "glue:GetTables",
+                "glue:GetPartition",
+                "glue:GetPartitions",
+            ],
+            resources=[
+                f"arn:aws:glue:{self.region}:{self.account}:catalog",
+                f"arn:aws:glue:{self.region}:{self.account}:database/ipl_cricket",
+                f"arn:aws:glue:{self.region}:{self.account}:table/ipl_cricket/*",
+            ],
+        ))
+
+        query_runner_fn = lambda_.Function(
+            self, "QueryRunner",
+            function_name="ipl-query-runner",
+            runtime=lambda_.Runtime.PYTHON_3_12,
+            handler="handler.handler",
+            code=lambda_.Code.from_asset("lambda/query_runner"),
+            role=query_runner_role,
+            timeout=Duration.seconds(60),
+            memory_size=256,
+            environment={
+                "ATHENA_WORKGROUP": "ipl-workgroup",
+                "ATHENA_DATABASE": "ipl_cricket",
+            },
+        )
+
+        # -------------------------------------------------------
+        # API Gateway
+        # -------------------------------------------------------
+
+        api = apigw.RestApi(
+            self, "IplApi",
+            rest_api_name="ipl-api",
+            description="IPL Cricket analytics API",
+            default_cors_preflight_options=apigw.CorsOptions(
+                allow_origins=apigw.Cors.ALL_ORIGINS,
+                allow_methods=["POST", "OPTIONS"],
+                allow_headers=["Content-Type"],
+            ),
+            deploy_options=apigw.StageOptions(stage_name="prod"),
+        )
+
+        query_resource = api.root.add_resource("query")
+        query_resource.add_method(
+            "POST",
+            apigw.LambdaIntegration(query_runner_fn, proxy=True),
+        )
+
+        # Usage plan with throttling
+        plan = api.add_usage_plan(
+            "IplUsagePlan",
+            name="ipl-usage-plan",
+            throttle=apigw.ThrottleSettings(
+                rate_limit=10,
+                burst_limit=20,
+            ),
+            quota=apigw.QuotaSettings(
+                limit=1000,
+                period=apigw.Period.DAY,
+            ),
+        )
+        plan.add_api_stage(
+            api=api,
+            stage=api.deployment_stage,
+        )
+
+        # -------------------------------------------------------
         # Outputs
         # -------------------------------------------------------
 
@@ -139,3 +265,5 @@ class IplStack(Stack):
         CfnOutput(self, "AthenaResultsBucket", value=athena_results_bucket.bucket_name)
         CfnOutput(self, "GlueDatabase", value="ipl_cricket")
         CfnOutput(self, "AthenaWorkgroup", value="ipl-workgroup")
+        CfnOutput(self, "QueryRunnerFunction", value=query_runner_fn.function_name)
+        CfnOutput(self, "ApiEndpoint", value=f"{api.url}query")
