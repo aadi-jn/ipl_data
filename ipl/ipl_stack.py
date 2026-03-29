@@ -9,6 +9,8 @@ from aws_cdk import (
     aws_lambda as lambda_,
     aws_iam as iam,
     aws_apigateway as apigw,
+    aws_cloudfront as cloudfront,
+    aws_cloudfront_origins as origins,
 )
 from constructs import Construct
 
@@ -255,6 +257,37 @@ class IplStack(Stack):
         )
 
         # -------------------------------------------------------
+        # CloudFront Distribution
+        # -------------------------------------------------------
+
+        distribution = cloudfront.Distribution(
+            self, "IplDistribution",
+            default_behavior=cloudfront.BehaviorOptions(
+                origin=origins.HttpOrigin(
+                    f"{frontend_bucket.bucket_name}.s3-website.{self.region}.amazonaws.com",
+                    protocol_policy=cloudfront.OriginProtocolPolicy.HTTP_ONLY,
+                ),
+                viewer_protocol_policy=cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
+                cache_policy=cloudfront.CachePolicy.CACHING_OPTIMIZED,
+                allowed_methods=cloudfront.AllowedMethods.ALLOW_GET_HEAD,
+            ),
+            error_responses=[
+                cloudfront.ErrorResponse(
+                    http_status=404,
+                    response_http_status=200,
+                    response_page_path="/index.html",
+                ),
+                cloudfront.ErrorResponse(
+                    http_status=403,
+                    response_http_status=200,
+                    response_page_path="/index.html",
+                ),
+            ],
+            price_class=cloudfront.PriceClass.PRICE_CLASS_ALL,
+            comment="IPL Cricket Query Engine",
+        )
+
+        # -------------------------------------------------------
         # Outputs
         # -------------------------------------------------------
 
@@ -267,3 +300,5 @@ class IplStack(Stack):
         CfnOutput(self, "AthenaWorkgroup", value="ipl-workgroup")
         CfnOutput(self, "QueryRunnerFunction", value=query_runner_fn.function_name)
         CfnOutput(self, "ApiEndpoint", value=f"{api.url}query")
+        CfnOutput(self, "CloudFrontUrl", value=f"https://{distribution.distribution_domain_name}")
+        CfnOutput(self, "CloudFrontDistributionId", value=distribution.distribution_id)
