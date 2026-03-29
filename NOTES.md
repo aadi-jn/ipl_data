@@ -28,11 +28,22 @@
 
 ### Glue
 - **Database**: `ipl_cricket`
-- **Tables**: `matches` (15 columns), `match_players` (4 columns), `deliveries` (14 columns)
+- **Tables**: `matches` (9 columns: filename, team1, team2, date, winner, win_type, win_margin, method, parsed_date)
+- `match_players` and `deliveries` tables removed (to be added when data is ready)
 - All tables point to `s3://ipl-processed-data-814871720600/<table_name>/`
+
+### Data Uploaded
+| File | S3 Path | Rows |
+|------|---------|------|
+| match_info.csv → match_info.parquet | `s3://ipl-processed-data-814871720600/matches/match_info.parquet` | 1169 |
 
 ### Athena
 - **Workgroup**: `ipl-workgroup` → results at `s3://ipl-athena-results-814871720600/results/`
+
+### Athena Query Results (2026-03-29)
+- Total matches: **1169**
+- Top 5 winners: Mumbai Indians (153), Chennai Super Kings (142), Kolkata Knight Riders (136), Rajasthan Royals (116), Royal Challengers Bangalore (116)
+- Most played matchup: Chennai Super Kings vs Mumbai Indians (23 games)
 
 ### CloudFormation
 - **Stack**: `IplStack` (arn:aws:cloudformation:ap-south-1:814871720600:stack/IplStack/6b6e2b80-2ab7-11f1-ba4e-0a7b269a06b5)
