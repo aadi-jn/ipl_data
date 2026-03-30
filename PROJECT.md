@@ -1,6 +1,7 @@
 # IPL Analytics Showcase — Project Plan
 
-**Owner:** Aadi Jain | **Started:** March 2026 | **Goal:** Land a Head of Data / Analytics Manager role at a Series A-B consumer startup in Bangalore within 1-2 months.
+**Owner:** Aadi Jain | **Started:** March 2026 | **Timeline:** 9 weeks (Mar 31 – Jun 1, 2026, aligned with IPL season)
+**Goal:** Land a Head of Data / Analytics Manager role at a Series A-B consumer startup in Bangalore — and build a genuinely useful product in the process.
 
 ---
 
@@ -8,7 +9,7 @@
 
 IPL season is live. India's data community is engaged. Build a public, AI-augmented analytics tool on IPL data — and document the entire journey of building it.
 
-**The product:** A website that delivers real-time, AI-powered insights on IPL — not just stats, but contextual analysis that feels like having an analytics leader watching every match with you.
+**The product:** A fully functional, AI-augmented IPL analytics platform — not a portfolio piece, but a real product with 7-8 distinct analysis tabs, real-time match features, MCP servers for programmatic access, and a path to monetization. Not just stats, but contextual analysis that feels like having an analytics leader watching every match with you.
 
 **The content play:** Build in public on LinkedIn. Share the behind-the-scenes of the craft — finding and evaluating data sources, building pipelines, optimizing tables for analytical queries, making data AI-ready, prompt engineering for sports insights. The data community eats this up because it's *their* work, applied to something they care about.
 
@@ -18,6 +19,8 @@ IPL season is live. India's data community is engaged. Build a public, AI-augmen
 4. **Creates inbound** — hiring managers at consumer startups see someone who can build an AI-ready data stack from scratch
 
 **One-line pitch:** "I built an AI-powered IPL insights engine from raw data to real-time analysis — and documented every decision along the way."
+
+**Target users:** Tech-savvy cricket fans, data professionals, journalists — people who appreciate depth and want programmatic access to IPL data. Good overlap with Aadi's target hiring audience.
 
 ---
 
@@ -45,40 +48,26 @@ IPL season is live. India's data community is engaged. Build a public, AI-augmen
 
 ## What We're Building
 
-### Phase 1: Data Foundation (Week 1)
-**Goal:** Get ball-by-ball data into Athena so rich analysis is possible.
+The project has three broad phases. Weeks 1-3 are about getting all the data into one place and building stable infrastructure. Around week 4, it shifts to AI-enabled features because the data is ready and tested. Beyond that, it shifts to NL queries, animated summaries, MCP connectors, and more engaging features.
+
+Priorities will change almost every week as we see what's easy, what's hard, what's needed, and what doesn't matter. See `project-docs/weekly_plan.md` for the concrete week-by-week breakdown.
+
+### Phase 1: Data Foundation & First Impressions (Weeks 1-3)
+**Goal:** All data ingested, stable infrastructure, a frontend people want to use, and pre-match analysis live.
 
 - [ ] Process and upload ball-by-ball/deliveries data to S3 (Parquet)
 - [ ] Add Glue table definitions for `deliveries` and `match_players`
 - [ ] Validate data quality — row counts, nulls, edge cases
-- [ ] Build a few key derived views/tables:
+- [ ] Build derived tables/views:
   - Player career stats (runs, wickets, strike rate, economy)
   - Team season summaries
   - Venue performance
   - Powerplay / middle overs / death overs splits
-
-### Phase 2: Auto-Insights Engine (Week 1-2)
-**Goal:** Build the AI-powered "wow factor" — an engine that surfaces interesting patterns automatically.
-
-This is the core differentiator. Not a chatbot. Not NL-to-SQL. An **automated insight generator** that:
-
-1. Runs a battery of analytical queries against the IPL data
-2. Feeds results to an LLM (Claude via Bedrock) with a prompt like: *"You are an analytics leader at an IPL franchise. Here's the data. What's surprising? What's actionable? What would you present to the team owner?"*
-3. Surfaces ranked insights with supporting data and visualizations
-4. Frames everything as **business decisions**, not just stats
-
-**Why this matters for the job search:** Every target role in job-filter.md mentions "AI tooling" and "self-serve analytics." This feature IS that — an AI system that generates insights without anyone asking.
-
-**Example auto-insights:**
-- "RCB's powerplay run rate has dropped 15% since 2022 — but their middle-overs acceleration is league-best. They're shifting strategy."
-- "Teams batting first at Chinnaswamy win 62% when scoring 180+, but only 31% at 160-179. There's a sharp cliff — not a gradient."
-- "Player X has the highest death-over economy in the league but only gets 2 overs/match. Underutilized or mistrusted?"
-
-### Phase 3: Visualization Layer (Week 2-3)
-**Goal:** Transform the site from SQL editor to an analytics showcase with interactive charts.
-
-- [ ] Choose a charting library (Recharts or Chart.js — keep it simple)
-- [ ] Build 6-8 interactive visualizations, each designed to be a LinkedIn post:
+- [ ] Redesign frontend from SQL editor to a real analytics interface
+- [ ] Pre-match analysis cards from historical data (H2H, venue, form, toss)
+- [ ] Mobile-responsive layout
+- [ ] Deep ball-by-ball analytics (phase-wise performance, player matchups) — week 3
+- [ ] 6-8 interactive visualizations, each designed to also be a LinkedIn post:
   1. **Team dominance timeline** — which teams dominated which eras (heatmap or bump chart)
   2. **Toss impact analysis** — does winning toss actually matter? (spoiler: it's nuanced)
   3. **Death overs specialists** — who owns the last 4 overs? (scatter: economy vs wickets)
@@ -87,28 +76,84 @@ This is the core differentiator. Not a chatbot. Not NL-to-SQL. An **automated in
   6. **Clutch performers** — who performs best in high-pressure situations?
   7. **The "AI Insights" page** — auto-generated insights with supporting charts
   8. **Season-over-season trends** — IPL's evolution as a league
-
 - [ ] Each visualization should have:
   - A compelling headline (LinkedIn-ready)
   - The insight in 1-2 sentences (the "so what")
   - Interactive chart (hover, filter, drill-down)
   - A "methodology" expandable section (shows analytical rigor)
 
-### Phase 4: Content Engine (Week 2-4, ongoing)
-**Goal:** 2-3 LinkedIn posts/week during IPL season. Mix of content types — not every post needs to point in the same direction.
+### Phase 2: Auto-Insights Engine (Weeks 2-4)
+**Goal:** Build the AI-powered "wow factor" — an engine that surfaces interesting patterns automatically.
 
-**Pillar A: Build in Public** — behind-the-scenes of building the tool
+This is the core differentiator. Not a chatbot. Not NL-to-SQL. An **automated insight generator** that:
+
+1. Runs a battery of analytical queries against the IPL data
+2. Feeds results to an LLM with a prompt like: *"You are an analytics leader at an IPL franchise. Here's the data. What's surprising? What's actionable? What would you present to the team owner?"*
+3. Surfaces ranked insights with supporting data and visualizations
+4. Frames everything as **business decisions**, not just stats
+
+Auto-insights are generated once per match day (or twice if there are two games). This keeps costs minimal while delivering high value. Testing will use local/free open-source models before any paid API.
+
+**Why this matters for the job search:** Every target role in job-filter.md mentions "AI tooling" and "self-serve analytics." This feature IS that — an AI system that generates insights without anyone asking.
+
+**Example auto-insights:**
+- "RCB's powerplay run rate has dropped 15% since 2022 — but their middle-overs acceleration is league-best. They're shifting strategy."
+- "Teams batting first at Chinnaswamy win 62% when scoring 180+, but only 31% at 160-179. There's a sharp cliff — not a gradient."
+- "Player X has the highest death-over economy in the league but only gets 2 overs/match. Underutilized or mistrusted?"
+
+### Phase 3: Real-Time & AI Features (Weeks 4-5)
+**Goal:** Integrate live IPL 2026 data and shift to AI-enabled use cases.
+
+- [ ] Real-time data pipeline from live data source
+- [ ] Live match context: par scores, win probability, phase comparisons
+- [ ] Post-match analysis cards (turning points, player ratings, AI-generated summaries)
+- [ ] Points table with playoff math and NRR scenarios
+- [ ] Auto-insights running daily on live matches
+- [ ] Additional tabs: team analysis, player leaderboards, season narratives
+
+### Phase 4: NL Queries & Programmatic Access (Weeks 6-8)
+**Goal:** Open up the data for users to query directly, and provide programmatic access.
+
+**Natural language queries** are not as simple as they look. They require:
+- Guardrails around outputs
+- Metric definitions and context for the LLM
+- Testing with real users before going public
+- A backend that can handle complex/deep follow-up questions
+
+NL queries will be tested locally with open-source models throughout the project, but only go public once tested and validated — likely week 7 at the earliest.
+
+- [ ] NL query engine — internal testing (week 6), public launch (week 7 if ready)
+- [ ] MCP servers for programmatic access (Claude, Slack)
+- [ ] Text-based data sources: commentary, pre-match analysis
+- [ ] Animated match summaries or richer post-match content
+- [ ] Shareable stat cards, social content features
+
+### Phase 5: Season Wrap & Future (Week 9)
+**Goal:** End-of-season content, polish, and decide what continues post-IPL.
+
+- [ ] Player and team season summaries
+- [ ] NRR, points table race, playoff projections
+- [ ] Player performances over time across the IPL
+- [ ] About page / project story for new visitors
+- [ ] Speed, mobile, visual consistency polish
+- [ ] Retrospective: what worked, what to keep running
+
+### Content Engine (Ongoing, Weeks 1-9)
+**Goal:** ~4 LinkedIn posts/week during IPL season. Two pillars running in parallel.
+
+**Pillar A: Project Outcomes** (~2 posts/week) — insights, charts, features from the tool
+- Surprising stats, contrarian takes, myth-busting (e.g., toss impact)
+- Deep-dives on teams, players, venues, eras
+- AI-generated insights with the "so what" framed as strategy/business decisions
+- Screenshots/recordings of the tool in action on live matches
+
+**Pillar B: AI Analytics Narrative** (~2 posts/week) — behind-the-scenes, collaboration, broader AI analytics thinking
 - "I found 1,169 IPL matches in YAML files. Here's how I turned them into a queryable data lake."
 - "Optimizing Parquet tables for AI — what 'AI-ready data' actually means in practice"
 - "Why I chose Athena over BigQuery for this project (and when I'd choose differently)"
 - "Prompt engineering for sports analytics — what works, what hallucinates, what surprises"
 - Pipeline diagrams, code snippets, architecture decisions
-
-**Pillar B: IPL Insights & Analysis** — genuinely interesting findings from the data
-- Surprising stats, contrarian takes, myth-busting (e.g., toss impact)
-- Deep-dives on teams, players, venues, eras
-- AI-generated insights with the "so what" framed as strategy/business decisions
-- Screenshots/recordings of the tool in action on live matches
+- Invitations to collaborate, feedback requests
 
 **Content format per post:**
 1. Hook (1 line — surprising stat, behind-the-scenes moment, or contrarian take)
@@ -116,26 +161,7 @@ This is the core differentiator. Not a chatbot. Not NL-to-SQL. An **automated in
 3. Visual (chart screenshot, tool demo, pipeline diagram, or code snippet)
 4. CTA (link to the live tool)
 
-**Rough calendar (flexible — go with what's interesting):**
-
-| Week | Mix | Example posts |
-|------|-----|---------------|
-| 1 | Build in public | "I'm building an AI-powered IPL insights engine" / Data pipeline walkthrough |
-| 2 | Insights + build | Player/team deep-dive / "Making 200K deliveries AI-ready" |
-| 3 | AI reveal + insights | "What AI sees in IPL data that dashboards can't" / Tool demo + a finding |
-| 4 | Both | Live tool on current matches / "How I built this" deep-dive |
-| 5+ | Whatever works | React to live IPL 2026 / Ongoing mix of both pillars |
-
 **Experiment and iterate.** See which pillar gets more engagement and lean into it.
-
-### Phase 5: Polish & Portfolio (Week 3-4)
-**Goal:** Make the site interview-ready.
-
-- [ ] Add an "About" section explaining the project's tech stack and approach
-- [ ] Mobile-responsive design (LinkedIn audience is 60%+ mobile)
-- [ ] Custom domain (optional but professional)
-- [ ] Open-source the analysis notebooks/queries (shows transparency)
-- [ ] Performance optimization (fast loads, no spinners)
 
 ---
 
@@ -179,11 +205,13 @@ This is the core differentiator. Not a chatbot. Not NL-to-SQL. An **automated in
 
 | Decision | Choice | Why |
 |----------|--------|-----|
-| AI model | Claude via Bedrock | Already in ap-south-1, no API key management, pay-per-use |
+| AI model (testing) | Local open-source models | Free, no API costs, good enough for prototyping and internal testing |
+| AI model (production) | TBD — Bedrock or other | Defer until NL queries go public; auto-insights can use local models initially |
 | Charts | TBD (Recharts vs Chart.js) | Need to evaluate — Recharts is React-native, Chart.js is more flexible |
 | Data processing | Python scripts (local) → Parquet → S3 | Simple, repeatable, no Spark overhead for this data size |
 | Content screenshots | TBD | May need a way to export charts as images for LinkedIn posts |
-| Live data updates | Out of scope initially | Would need a scraping/API pipeline — defer unless IPL 2026 analysis becomes the hook |
+| Live data updates | In scope (weeks 4-5) | Data sources exist; pipeline to be built when foundation is stable |
+| MCP servers | In scope (weeks 6-8) | Programmatic access via Claude/Slack for users |
 
 ---
 
@@ -203,24 +231,25 @@ Not vanity metrics. Outcomes that lead to the job:
 
 ## Open Questions
 
-### Must resolve before building
+### Resolved
 
-1. **Ball-by-ball data format:** What format is the data in? (CSV, YAML, JSON?) Need to plan the processing pipeline.
-2. **Bedrock access:** Is Claude model enabled in Bedrock for your AWS account in ap-south-1? Need to check/enable.
-3. **Budget:** What's the monthly AWS spend ceiling? Athena + Bedrock can add up with heavy querying.
+1. **Ball-by-ball data format:** JSON from Cricsheet. See `project-docs/data_format.md` for full reference.
+2. **Budget:** $120 AWS free credits for 6 months. Stay within this. No Bedrock spend yet — local models for testing.
+3. **Live IPL 2026 data:** Data sources exist. Will integrate in weeks 4-5.
+4. **Timeline:** 9 weeks (Mar 31 – Jun 1), not 4. Realistic pace alongside job search and other commitments.
 
 ### Should resolve during building
 
-4. **Chart library:** Recharts (React-native, easier) vs Chart.js (more chart types, bigger community). Need to prototype both.
-5. **Custom domain:** Worth buying one? (e.g., iplanalytics.in) Adds professionalism but costs time to set up.
-6. **Mobile experience:** How much effort to invest? LinkedIn mobile users will click through — a bad mobile experience kills credibility.
+5. **Chart library:** Recharts (React-native, easier) vs Chart.js (more chart types, bigger community). Need to prototype both.
+6. **Custom domain:** Worth buying one? (e.g., iplanalytics.in) Adds professionalism but costs time to set up.
 7. **Open-sourcing:** GitHub repo public from day 1, or reveal later for a "how I built this" post?
+8. **Bedrock vs alternatives:** When auto-insights or NL queries go to production, which AI backend? Defer until week 4+.
 
 ### Nice to resolve eventually
 
-8. **Live IPL 2026 data:** Is there an API or data source for current-season matches? Real-time analysis would be a massive engagement driver.
 9. **Collaboration:** Any data friends who'd co-create content? Shared posts get more reach.
-10. **Post-IPL longevity:** What happens to the site after IPL season? Does it become a permanent portfolio piece or sunset?
+10. **Post-IPL longevity:** What happens to the site after IPL season? This is a product, not just a season project — what's the longer-term vision?
+11. **Monetization:** Pay tier for MCP/API access or premium features. When and how?
 
 ---
 
@@ -230,36 +259,25 @@ Not vanity metrics. Outcomes that lead to the job:
 |------|--------|------------|
 | AI insights are generic/boring | Project loses its differentiator | Invest heavily in prompt engineering; frame insights as franchise-level decisions, not trivia |
 | Low LinkedIn engagement | No eyeballs → no job leads | Test hooks with smaller posts first; engage with others' IPL content to build momentum |
-| Time crunch (10-20 hrs/week) | Can't ship all phases | Phase 1-2 are non-negotiable; Phase 5 is nice-to-have. Ship imperfect > ship late |
+| Time crunch (limited hrs/week) | Can't ship all phases | Phase 1-2 are non-negotiable; later phases flex. Ship imperfect > ship late |
 | Cricket domain gaps | Analysis feels shallow to real fans | Lean into the "analytics leader perspective" framing — you're not competing with Cricbuzz on cricket knowledge |
 | AWS costs spiral | Bedrock + Athena costs | Set billing alarms; cache AI-generated insights; limit Athena scans with partitioning |
 
 ---
 
-## Weekly Plan (4-week sprint)
+## Weekly Plan (9 weeks)
 
-### Week 1 (Mar 31 - Apr 6)
-- Process and upload ball-by-ball data
-- Build derived tables/views
-- Enable Bedrock, prototype auto-insights Lambda
-- First LinkedIn post: "I analyzed every IPL match ever played. Here's what I found."
+See `project-docs/weekly_plan.md` for the detailed week-by-week breakdown.
 
-### Week 2 (Apr 7 - Apr 13)
-- Build auto-insights engine (queries → LLM → ranked insights)
-- Start visualization layer (2-3 charts)
-- LinkedIn posts: player/team deep-dives with chart screenshots
+**Summary of the arc:**
+- **Weeks 1-3:** Data foundation, stable infrastructure, pre-match analysis, frontend redesign, first visualizations
+- **Week 4:** Shift to AI-enabled features — auto-insights on live matches, post-match analysis
+- **Week 5:** Real-time data pipeline, live match features
+- **Weeks 6-7:** NL queries (test then launch), MCP servers, text-based data sources
+- **Week 8:** Connectors (Slack, Claude), social features, end-of-season analytics
+- **Week 9:** Season wrap, polish, retrospective
 
-### Week 3 (Apr 14 - Apr 20)
-- Complete visualization layer (6-8 charts)
-- Build the "AI Insights" page on the site
-- LinkedIn posts: AI insights reveal + methodology
-- Polish mobile experience
-
-### Week 4 (Apr 21 - Apr 27)
-- About page, portfolio polish
-- "How I built this" LinkedIn post (tech stack + process)
-- Start applying to target-archetype companies with project as portfolio centerpiece
-- Retrospective: what worked, what to keep posting
+Priorities will shift weekly. The weekly plan has 4-6 concrete items per week — enough to stay focused, flexible enough to adapt.
 
 ---
 
