@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 
 const API_URL = 'https://k9s4lfemfe.execute-api.ap-south-1.amazonaws.com/prod/query'
 
@@ -105,7 +105,203 @@ function SortIcon({ active, dir }) {
   return <span className="ml-1 text-xs" style={{ color: 'var(--ci-blue)' }}>{dir === 'asc' ? '▲' : '▼'}</span>
 }
 
+function PreMatch() {
+  const [data, setData] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [selectedIdx, setSelectedIdx] = useState(0)
+
+  useEffect(() => {
+    fetch('/prematch.json')
+      .then(r => {
+        if (!r.ok) throw new Error('No pre-match data available')
+        return r.json()
+      })
+      .then(d => { setData(d); setLoading(false) })
+      .catch(e => { setError(e.message); setLoading(false) })
+  }, [])
+
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center py-20 rounded-lg animate-fade-in"
+      style={{ backgroundColor: 'var(--ci-surface)', border: '1px solid var(--ci-border)' }}>
+      <Spinner size="lg" />
+      <p className="mt-4 text-sm font-medium" style={{ color: 'var(--ci-text-muted)' }}>Loading pre-match data...</p>
+    </div>
+  )
+
+  if (error || !data?.matches?.length) return (
+    <div className="rounded-lg p-8 text-center animate-fade-in"
+      style={{ backgroundColor: 'var(--ci-surface)', border: '1px solid var(--ci-border)' }}>
+      <p className="text-sm font-medium" style={{ color: 'var(--ci-text-muted)' }}>
+        {error || 'No matches scheduled for today.'}
+      </p>
+    </div>
+  )
+
+  const match = data.matches[selectedIdx]
+  const a = match.analysis
+  const h2h = a.head_to_head
+  const toss = a.toss_at_venue
+
+  const formString = (form) => form.map(f =>
+    f.result === 'W'
+      ? `W vs ${f.opponent.split(' ').pop()}`
+      : `L vs ${f.opponent.split(' ').pop()}`
+  ).join('  |  ')
+
+  return (
+    <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+      {/* Match selector */}
+      {data.matches.length > 1 && (
+        <div className="mb-5">
+          <select
+            value={selectedIdx}
+            onChange={e => setSelectedIdx(Number(e.target.value))}
+            className="text-sm font-medium px-4 py-2.5 rounded-lg"
+            style={{
+              backgroundColor: 'var(--ci-surface)',
+              border: '1px solid var(--ci-border)',
+              color: 'var(--ci-text)',
+              outline: 'none',
+            }}
+          >
+            {data.matches.map((m, i) => (
+              <option key={i} value={i}>
+                Match {m.match_number}: {m.team1_short} vs {m.team2_short} — {m.time_ist} IST
+              </option>
+            ))}
+          </select>
+        </div>
+      )}
+
+      {/* Match header */}
+      <div className="rounded-lg mb-5 overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, var(--ci-blue) 0%, var(--ci-blue-dark) 100%)',
+          boxShadow: '0 2px 12px rgba(3, 152, 220, 0.25)',
+        }}>
+        <div className="px-6 py-5">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold uppercase tracking-wider"
+              style={{ color: 'rgba(255,255,255,0.7)' }}>
+              Match {match.match_number} &middot; IPL 2026
+            </span>
+            <span className="text-xs font-medium px-2.5 py-1 rounded-full"
+              style={{ background: 'rgba(255,255,255,0.15)', color: 'rgba(255,255,255,0.9)' }}>
+              {match.time_ist} IST
+            </span>
+          </div>
+          <h2 className="text-xl font-bold" style={{ color: '#fff' }}>
+            {match.team1} vs {match.team2}
+          </h2>
+          <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.8)' }}>
+            {match.stadium} &middot; {match.city}
+          </p>
+        </div>
+      </div>
+
+      {/* Analysis sections */}
+      <div className="space-y-4">
+
+        {/* Head to Head */}
+        <Section title="Head-to-Head Record">
+          <Stat label="Total matches" value={h2h.total} />
+          <Stat label={`${match.team1_short} wins`} value={h2h.team1_wins} />
+          <Stat label={`${match.team2_short} wins`} value={h2h.team2_wins} />
+          {h2h.no_results > 0 && <Stat label="No result" value={h2h.no_results} />}
+          {h2h.last_5_encounters.length > 0 && (
+            <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--ci-border-light)' }}>
+              <p className="text-xs font-semibold uppercase tracking-wider mb-2"
+                style={{ color: 'var(--ci-text-muted)' }}>Recent encounters</p>
+              {h2h.last_5_encounters.map((e, i) => (
+                <p key={i} className="text-sm mb-1" style={{ color: 'var(--ci-text-secondary)' }}>
+                  {e.date} — <span style={{ color: 'var(--ci-text)', fontWeight: 500 }}>{e.winner}</span> won {e.margin} <span style={{ color: 'var(--ci-text-muted)' }}>({e.city})</span>
+                </p>
+              ))}
+            </div>
+          )}
+        </Section>
+
+        {/* Venue Record */}
+        <Section title={`At ${match.city}`}>
+          <Stat label={`${match.team1_short} record`}
+            value={`${a.team1_venue_record.won}W / ${a.team1_venue_record.played - a.team1_venue_record.won}L in ${a.team1_venue_record.played} matches`} />
+          <Stat label={`${match.team2_short} record`}
+            value={`${a.team2_venue_record.won}W / ${a.team2_venue_record.played - a.team2_venue_record.won}L in ${a.team2_venue_record.played} matches`} />
+          {toss.total_matches > 0 && <>
+            <div className="mt-3 pt-3" style={{ borderTop: '1px solid var(--ci-border-light)' }}>
+              <Stat label="Bat first wins" value={toss.bat_first_won} />
+              <Stat label="Field first wins" value={toss.field_first_won} />
+            </div>
+          </>}
+        </Section>
+
+        {/* Toss Factor */}
+        <Section title="Toss Factor at Venue">
+          <Stat label="Chose to field" value={`${toss.chose_field_pct}%`} />
+          <Stat label="Toss winner won match" value={`${toss.toss_winner_won_pct}%`} />
+        </Section>
+
+        {/* Recent Form */}
+        <Section title="Recent Form (Last 5)">
+          <p className="text-xs font-semibold uppercase tracking-wider mb-1.5"
+            style={{ color: 'var(--ci-text-muted)' }}>{match.team1_short}</p>
+          <div className="flex gap-1.5 mb-3 flex-wrap">
+            {a.team1_recent_form.map((f, i) => (
+              <span key={i} className="text-xs font-medium px-2 py-1 rounded"
+                style={{
+                  backgroundColor: f.result === 'W' ? '#DEF7EC' : '#FDE8E8',
+                  color: f.result === 'W' ? '#03543F' : '#9B1C1C',
+                }}>
+                {f.result} vs {f.opponent.split(' ').pop()}
+              </span>
+            ))}
+          </div>
+          <p className="text-xs font-semibold uppercase tracking-wider mb-1.5"
+            style={{ color: 'var(--ci-text-muted)' }}>{match.team2_short}</p>
+          <div className="flex gap-1.5 flex-wrap">
+            {a.team2_recent_form.map((f, i) => (
+              <span key={i} className="text-xs font-medium px-2 py-1 rounded"
+                style={{
+                  backgroundColor: f.result === 'W' ? '#DEF7EC' : '#FDE8E8',
+                  color: f.result === 'W' ? '#03543F' : '#9B1C1C',
+                }}>
+                {f.result} vs {f.opponent.split(' ').pop()}
+              </span>
+            ))}
+          </div>
+        </Section>
+      </div>
+
+      {/* Generated timestamp */}
+      <p className="text-xs mt-5 text-center" style={{ color: 'var(--ci-text-muted)' }}>
+        Last updated: {new Date(data.generated_at).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}
+      </p>
+    </div>
+  )
+}
+
+function Section({ title, children }) {
+  return (
+    <div className="rounded-lg px-5 py-4"
+      style={{ backgroundColor: 'var(--ci-surface)', border: '1px solid var(--ci-border)' }}>
+      <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--ci-text)' }}>{title}</h3>
+      {children}
+    </div>
+  )
+}
+
+function Stat({ label, value }) {
+  return (
+    <div className="flex items-center justify-between py-1">
+      <span className="text-sm" style={{ color: 'var(--ci-text-secondary)' }}>{label}</span>
+      <span className="text-sm font-semibold" style={{ color: 'var(--ci-text)' }}>{value}</span>
+    </div>
+  )
+}
+
 export default function App() {
+  const [activeTab, setActiveTab] = useState('prematch')
   const [query, setQuery] = useState(EXAMPLES[0].query)
   const [loading, setLoading] = useState(false)
   const [result, setResult] = useState(null)
@@ -226,24 +422,45 @@ export default function App() {
         </div>
       </nav>
 
-      {/* ── Breadcrumb strip ── */}
+      {/* ── Tab Navigation ── */}
       <div
         style={{
           backgroundColor: 'var(--ci-surface)',
           borderBottom: '1px solid var(--ci-border)',
         }}
       >
-        <div className="max-w-5xl mx-auto px-6 py-2 flex items-center gap-2 text-xs" style={{ color: 'var(--ci-text-muted)' }}>
-          <span>Stats</span>
-          <span style={{ color: 'var(--ci-border)' }}>/</span>
-          <span>IPL</span>
-          <span style={{ color: 'var(--ci-border)' }}>/</span>
-          <span style={{ color: 'var(--ci-text-secondary)' }} className="font-medium">Query Builder</span>
+        <div className="max-w-5xl mx-auto px-6 flex gap-0">
+          {[
+            { id: 'prematch', label: "Today's Match" },
+            { id: 'query', label: 'Query Engine' },
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className="px-4 py-3 text-sm font-medium transition-colors relative"
+              style={{
+                color: activeTab === tab.id ? 'var(--ci-blue)' : 'var(--ci-text-muted)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              {tab.label}
+              {activeTab === tab.id && (
+                <span className="absolute bottom-0 left-0 right-0 h-0.5"
+                  style={{ backgroundColor: 'var(--ci-blue)' }} />
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
       <main className="flex-1 px-6 py-6 animate-fade-in" style={{ animationDelay: '0.1s' }}>
         <div className="max-w-5xl mx-auto">
+
+          {activeTab === 'prematch' && <PreMatch />}
+
+          {activeTab === 'query' && <>
 
           {/* ── Schema Reference ── */}
           <div
@@ -549,6 +766,7 @@ export default function App() {
               )}
             </div>
           )}
+          </>}
         </div>
       </main>
 

@@ -1168,3 +1168,6 @@ filename,season,match_number,date,team1,team2,city,venue,neutral_venue,toss_winn
 1473510.yaml,,,2025-06-01,Mumbai Indians,Punjab Kings,Ahmedabad,"Narendra Modi Stadium, Ahmedabad",,Punjab Kings,field,Punjab Kings,wickets,5.0,,,,SS Iyer,CB Gaffaney,Nitin Menon
 1473511.yaml,,,2025-06-03,Royal Challengers Bengaluru,Punjab Kings,Ahmedabad,"Narendra Modi Stadium, Ahmedabad",,Punjab Kings,field,Royal Challengers Bengaluru,runs,6.0,,,,KH Pandya,J Madanagopal,Nitin Menon
 1485779.yaml,,,2025-05-24,Punjab Kings,Delhi Capitals,Jaipur,"Sawai Mansingh Stadium, Jaipur",,Delhi Capitals,field,Delhi Capitals,wickets,6.0,,,,Sameer Rizvi,J Madanagopal,P Joshi
+1527674.yaml,,,2026-03-28,Sunrisers Hyderabad,Royal Challengers Bengaluru,Bengaluru,"M Chinnaswamy Stadium, Bengaluru",,Royal Challengers Bengaluru,field,Royal Challengers Bengaluru,wickets,6,,,,JA Duffy,J Madanagopal,UV Gandhe
+1527675.yaml,,,2026-03-29,Kolkata Knight Riders,Mumbai Indians,Mumbai,"Wankhede Stadium, Mumbai",,Mumbai Indians,field,Mumbai Indians,wickets,6,,,,SN Thakur,Anish Sahasrabudhe,MV Saidharshan Kumar
+1527676.yaml,,,2026-03-30,Chennai Super Kings,Rajasthan Royals,Guwahati,"Barsapara Cricket Stadium, Guwahati",,Rajasthan Royals,field,Rajasthan Royals,wickets,8,,,,N Burger,HDPK Dharmasena,M Krishnadas

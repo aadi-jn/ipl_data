@@ -1,0 +1,197 @@
+DATA SOURCES & TABLES
+=====================
+
+1. match_info (data_modeling/match_info.csv → match_info.parquet)
+   Source: Cricsheet (https://cricsheet.org/downloads/ipl_male.zip)
+   Updated by: data_sources/update_match_info.py
+   Scope: All IPL matches 2008–2026 (1,172 rows as of Mar 31, 2026)
+   Glue table: ipl_cricket.matches
+   S3 path: s3://ipl-processed-data-814871720600/matches/match_info.parquet
+
+   Columns:
+     filename          string   Source YAML file (e.g. 335982.yaml)
+     season            string   IPL season year — often empty, use date instead
+     match_number      double   Match number within the season (from event metadata)
+     date              string   Match date (YYYY-MM-DD)
+     team1             string   First listed team
+     team2             string   Second listed team
+     city              string   City where match was played
+     venue             string   Stadium name
+     neutral_venue     double   1 if neutral venue, else null
+     toss_winner       string   Team that won the toss
+     toss_decision     string   "bat" or "field"
+     winner            string   Winning team (null if no result)
+     win_type          string   "runs" or "wickets"
+     win_margin        double   Margin of victory
+     result            string   "tie", "no result" (null if winner exists)
+     method            string   "D/L" if Duckworth-Lewis applied, else null
+     eliminator        string   Super over / bowl out winner
+     player_of_match   string   Player of the match
+     umpire1           string   First umpire
+     umpire2           string   Second umpire
+
+   Notes:
+     - Team names are historical (e.g. "Delhi Daredevils" pre-2019, "Delhi Capitals" post)
+     - See teams.json for canonical names and aliases
+     - Neutral venue field is sparse — mostly null
+
+
+2. ipl_2026_matches (data_sources/ipl_2026_matches.csv)
+   Source: CricAPI (https://api.cricapi.com/v1/series_info)
+   Updated by: data_sources/fetch_matches.py
+   Scope: IPL 2026 schedule — all 70 matches
+
+   Columns:
+     match_id          string   CricAPI unique match ID
+     match_number      int      Match number in the season (1–70)
+     date              string   Match date (YYYY-MM-DD)
+     datetime_gmt      string   Start time in GMT (ISO 8601)
+     datetime_ist      string   Start time in IST (YYYY-MM-DD HH:MM)
+     day_of_week       string   Day name (e.g. "Saturday")
+     team1             string   First team (current names)
+     team1_short       string   Abbreviation (e.g. "CSK") — note: CricAPI returns "RCBW" for RCB
+     team2             string   Second team
+     team2_short       string   Abbreviation
+     stadium           string   Stadium name
+     city              string   City
+     match_type        string   Always "t20"
+     match_started     bool     Whether match has started
+     match_ended       bool     Whether match has ended
+     is_completed      bool     match_started AND match_ended
+     result            string   Result text for completed matches, empty otherwise
+     has_squad         bool     Whether squad info is available
+
+   Notes:
+     - This is the schedule + live status, not historical analysis data
+     - Result text is CricAPI's format (e.g. "Royal Challengers Bengaluru won by 6 wkts")
+     - team1_short for RCB comes as "RCBW" from CricAPI — use teams.json for correct abbreviations
+
+
+3. home_grounds (data_sources/home_grounds.json)
+   Source: Derived from match_info + ipl_2026_matches
+   Updated by: data_sources/generate_home_grounds.py
+   Scope: Home ground mapping per team per season (2008–2026, excluding overseas/bubble years)
+
+   Structure: { "year": { "team_name": { "primary": { "city", "matches" }, "secondary": { "city", "matches" } } } }
+
+   Notes:
+     - Skipped years: 2009 (South Africa), 2020 (UAE), 2021 (India bubble), 2022 (Mumbai/Pune bubble)
+     - City names normalized: Mohali/New Chandigarh → Chandigarh, Bangalore → Bengaluru
+     - Secondary home requires ≥2 matches at that city
+     - 2026 uses full schedule, not just completed matches
+
+
+4. teams (data_sources/teams.json)
+   Source: Manual curation from historical data
+   Scope: All 15 IPL franchises (10 active, 5 defunct)
+
+   Structure: [{ "name", "short", "other_names", "active", "first_season", "last_season" }]
+
+   Notes:
+     - Canonical source for team name normalization
+     - other_names maps historical names to current (e.g. "Delhi Daredevils" → "Delhi Capitals")
+     - Defunct teams: Deccan Chargers, Gujarat Lions, Kochi Tuskers Kerala, Pune Warriors, Rising Pune Supergiant
+
+
+5. prematch (frontend/public/prematch.json)
+   Source: Derived from match_info + ipl_2026_matches
+   Updated by: data_sources/generate_prematch.py
+   Scope: Pre-match analysis for today's IPL matches
+
+   Structure: { "generated_at", "date", "matches": [{ match details + analysis }] }
+
+   Analysis includes:
+     - head_to_head: total, team1_wins, team2_wins, last 5 encounters
+     - team1/2_venue_record: played, won at the match city
+     - toss_at_venue: chose_field_pct, toss_winner_won_pct, bat/field first wins
+     - team1/2_recent_form: last 5 results (W/L with opponent)
+
+   Notes:
+     - Regenerated daily — only contains today's matches
+     - Team names normalized using aliases (handles franchise renames)
+     - City aliases applied for venue matching (Mohali/Chandigarh/New Chandigarh)
+     - Served as static JSON from CloudFront — no Athena queries on load
+
+
+6. ball_by_ball (data_modeling/ball_by_ball.csv → ball_by_ball.parquet)
+   Source: Cricsheet (https://cricsheet.org/downloads/ipl_male_json.zip)
+   Updated by: data_sources/extract_ball_by_ball.py
+   Scope: Every delivery in IPL history 2008–2026 (278,205 rows across 1,169 matches)
+
+   Columns:
+     match_id          int      Cricsheet match ID
+     date              string   Match date (YYYY-MM-DD)
+     venue             string   Stadium name
+     city              string   City
+     team1             string   First listed team
+     team2             string   Second listed team
+     season            string   IPL season year
+     innings           int      Innings number (1 or 2)
+     batting_team      string   Team batting
+     bowling_team      string   Team bowling
+     over              int      Over number (1-indexed)
+     ball              int      Ball number within the over
+     batter            string   Batter on strike
+     bowler            string   Bowler
+     non_striker       string   Batter at non-striker end
+     batter_runs       int      Runs scored by the batter off this ball
+     extras_total      int      Total extras on this delivery
+     total_runs        int      Total runs off this delivery (batter + extras)
+     wides             int      Wide runs (0 if not a wide)
+     noballs           int      No-ball runs (0 if not a no-ball)
+     byes              int      Bye runs
+     legbyes           int      Leg-bye runs
+     penalty           int      Penalty runs
+     is_wicket         int      1 if a wicket fell, else 0
+     player_out        string   Name of dismissed batter (empty if no wicket)
+     dismissal_kind    string   Type of dismissal (caught, bowled, lbw, run out, etc.)
+     fielder           string   Fielder involved in dismissal (empty if N/A)
+
+   Notes:
+     - Wides don't count as balls faced by the batter
+     - Multiple wickets on same delivery (e.g. run out both ends) produce extra rows
+     - Source JSON files stored in ipl_json/ directory (outside repo)
+
+
+7. batter_scorecard (data_modeling/batter_scorecard.csv → batter_scorecard.parquet)
+   Source: Derived from ball_by_ball
+   Updated by: data_sources/generate_batter_scorecard.py
+   Scope: Per-match batter scorecards (17,703 rows across 1,169 matches)
+
+   Columns:
+     match_id             int      Cricsheet match ID
+     date                 string   Match date (YYYY-MM-DD)
+     venue                string   Stadium name
+     city                 string   City
+     season               string   IPL season year
+     batting_team         string   Batter's team
+     bowling_team         string   Opposition team
+     innings              int      1 = setting score, 2 = chasing
+     batter               string   Batter name
+     entry_score          int      Team total when batter came in
+     entry_wickets        int      Wickets fallen when batter came in
+     entry_over           int      Over number when batter came in
+     entry_bowler         string   Bowler who bowled batter's first ball
+     runs_after_5_balls   float    Batter's runs after 5 balls faced (null if < 5 balls)
+     runs_after_10_balls  float    Batter's runs after 10 balls faced (null if < 10 balls)
+     runs_after_20_balls  float    Batter's runs after 20 balls faced (null if < 20 balls)
+     runs_after_30_balls  float    Batter's runs after 30 balls faced (null if < 30 balls)
+     runs_after_40_balls  float    Batter's runs after 40 balls faced (null if < 40 balls)
+     runs_after_50_balls  float    Batter's runs after 50 balls faced (null if < 50 balls)
+     total_runs           int      Total runs scored
+     total_balls_faced    int      Total legal deliveries faced (excludes wides)
+     out                  bool     Whether batter was dismissed
+     dismissal_kind       string   How batter got out (caught, bowled, lbw, run out, etc.)
+     dismissal_bowler     string   Bowler who took the wicket
+     dismissal_fielder    string   Fielder involved (empty if N/A)
+
+   Notes:
+     - Milestone scores (runs_after_N_balls) are null when batter faced fewer than N balls
+     - Dismissal info comes from player_out field, not batter field — catches run outs correctly
+     - Entry context reflects team state at batter's first delivery in the innings
+
+
+8. series_info (data_sources/series_info.json)
+   Source: CricAPI raw response
+   Scope: Raw API dump of IPL 2026 series info
+   Notes: Reference only — ipl_2026_matches.csv is the cleaned version of this data

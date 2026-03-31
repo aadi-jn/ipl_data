@@ -1,0 +1,126 @@
+{
+  "generated_at": "2026-03-31T17:05:04.427503+05:30",
+  "date": "2026-03-31",
+  "matches": [
+    {
+      "match_number": 4,
+      "date": "2026-03-31",
+      "time_ist": "19:30",
+      "team1": "Punjab Kings",
+      "team1_short": "PBKS",
+      "team2": "Gujarat Titans",
+      "team2_short": "GT",
+      "stadium": "Maharaja Yadavindra Singh International Cricket Stadium, Mullanpur",
+      "city": "New Chandigarh",
+      "analysis": {
+        "head_to_head": {
+          "total": 6,
+          "team1_wins": 3,
+          "team2_wins": 3,
+          "no_results": 0,
+          "last_5_encounters": [
+            {
+              "date": "2025-03-25",
+              "winner": "Punjab Kings",
+              "margin": "by 11 runs",
+              "city": "Ahmedabad"
+            },
+            {
+              "date": "2024-04-21",
+              "winner": "Gujarat Titans",
+              "margin": "by 3 wickets",
+              "city": "Mohali"
+            },
+            {
+              "date": "2024-04-04",
+              "winner": "Punjab Kings",
+              "margin": "by 3 wickets",
+              "city": "Ahmedabad"
+            },
+            {
+              "date": "2023-04-13",
+              "winner": "Gujarat Titans",
+              "margin": "by 6 wickets",
+              "city": "Chandigarh"
+            },
+            {
+              "date": "2022-05-03",
+              "winner": "Punjab Kings",
+              "margin": "by 8 wickets",
+              "city": "Navi Mumbai"
+            }
+          ]
+        },
+        "team1_venue_record": {
+          "played": 71,
+          "won": 34
+        },
+        "team2_venue_record": {
+          "played": 3,
+          "won": 2
+        },
+        "toss_at_venue": {
+          "total_matches": 72,
+          "chose_field_pct": 71,
+          "toss_winner_won_pct": 50,
+          "bat_first_won": 33,
+          "field_first_won": 39
+        },
+        "team1_recent_form": [
+          {
+            "date": "2025-06-03",
+            "opponent": "Royal Challengers Bengaluru",
+            "result": "L"
+          },
+          {
+            "date": "2025-06-01",
+            "opponent": "Mumbai Indians",
+            "result": "W"
+          },
+          {
+            "date": "2025-05-29",
+            "opponent": "Royal Challengers Bengaluru",
+            "result": "L"
+          },
+          {
+            "date": "2025-05-26",
+            "opponent": "Mumbai Indians",
+            "result": "W"
+          },
+          {
+            "date": "2025-05-24",
+            "opponent": "Delhi Capitals",
+            "result": "L"
+          }
+        ],
+        "team2_recent_form": [
+          {
+            "date": "2025-05-30",
+            "opponent": "Mumbai Indians",
+            "result": "L"
+          },
+          {
+            "date": "2025-05-25",
+            "opponent": "Chennai Super Kings",
+            "result": "L"
+          },
+          {
+            "date": "2025-05-22",
+            "opponent": "Lucknow Super Giants",
+            "result": "L"
+          },
+          {
+            "date": "2025-05-18",
+            "opponent": "Delhi Capitals",
+            "result": "W"
+          },
+          {
+            "date": "2025-05-06",
+            "opponent": "Mumbai Indians",
+            "result": "W"
+          }
+        ]
+      }
+    }
+  ]
+}

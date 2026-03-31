@@ -1,0 +1,1193 @@
+{
+  "2008": {
+    "Chennai Super Kings": {
+      "primary": {
+        "city": "Chennai",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 3
+      }
+    },
+    "Deccan Chargers": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 6
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 2
+      }
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 2
+      }
+    },
+    "Rajasthan Royals": {
+      "primary": {
+        "city": "Jaipur",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 3
+      }
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 7
+      },
+      "secondary": null
+    }
+  },
+  "2010": {
+    "Chennai Super Kings": {
+      "primary": {
+        "city": "Chennai",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 3
+      }
+    },
+    "Deccan Chargers": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Nagpur",
+        "matches": 3
+      }
+    },
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 2
+      }
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 10
+      },
+      "secondary": null
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Dharamsala",
+        "matches": 2
+      }
+    },
+    "Rajasthan Royals": {
+      "primary": {
+        "city": "Ahmedabad",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Jaipur",
+        "matches": 3
+      }
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 3
+      }
+    }
+  },
+  "2011": {
+    "Chennai Super Kings": {
+      "primary": {
+        "city": "Chennai",
+        "matches": 8
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 3
+      }
+    },
+    "Deccan Chargers": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 2
+      }
+    },
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 2
+      }
+    },
+    "Kochi Tuskers Kerala": {
+      "primary": {
+        "city": "Kochi",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 2
+      }
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 2
+      }
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 9
+      },
+      "secondary": null
+    },
+    "Pune Warriors": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 8
+      },
+      "secondary": null
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Dharamsala",
+        "matches": 3
+      }
+    },
+    "Rajasthan Royals": {
+      "primary": {
+        "city": "Jaipur",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 6
+      },
+      "secondary": {
+        "city": "Chennai",
+        "matches": 3
+      }
+    }
+  },
+  "2012": {
+    "Chennai Super Kings": {
+      "primary": {
+        "city": "Chennai",
+        "matches": 10
+      },
+      "secondary": null
+    },
+    "Deccan Chargers": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Visakhapatnam",
+        "matches": 2
+      }
+    },
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 8
+      },
+      "secondary": {
+        "city": "Pune",
+        "matches": 2
+      }
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Chennai",
+        "matches": 2
+      }
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 8
+      },
+      "secondary": {
+        "city": "Bengaluru",
+        "matches": 2
+      }
+    },
+    "Pune Warriors": {
+      "primary": {
+        "city": "Pune",
+        "matches": 8
+      },
+      "secondary": null
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 6
+      },
+      "secondary": {
+        "city": "Dharamsala",
+        "matches": 2
+      }
+    },
+    "Rajasthan Royals": {
+      "primary": {
+        "city": "Jaipur",
+        "matches": 8
+      },
+      "secondary": null
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 7
+      },
+      "secondary": null
+    }
+  },
+  "2013": {
+    "Chennai Super Kings": {
+      "primary": {
+        "city": "Chennai",
+        "matches": 8
+      },
+      "secondary": {
+        "city": "Delhi",
+        "matches": 2
+      }
+    },
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 6
+      },
+      "secondary": {
+        "city": "Raipur",
+        "matches": 2
+      }
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 6
+      },
+      "secondary": {
+        "city": "Ranchi",
+        "matches": 2
+      }
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 8
+      },
+      "secondary": {
+        "city": "Kolkata",
+        "matches": 3
+      }
+    },
+    "Pune Warriors": {
+      "primary": {
+        "city": "Pune",
+        "matches": 8
+      },
+      "secondary": null
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 6
+      },
+      "secondary": {
+        "city": "Dharamsala",
+        "matches": 2
+      }
+    },
+    "Rajasthan Royals": {
+      "primary": {
+        "city": "Jaipur",
+        "matches": 8
+      },
+      "secondary": {
+        "city": "Delhi",
+        "matches": 2
+      }
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 8
+      },
+      "secondary": null
+    },
+    "Sunrisers Hyderabad": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 8
+      },
+      "secondary": {
+        "city": "Delhi",
+        "matches": 2
+      }
+    }
+  },
+  "2014": {
+    "Chennai Super Kings": {
+      "primary": {
+        "city": "Ranchi",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 3
+      }
+    },
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 5
+      },
+      "secondary": null
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Cuttack",
+        "matches": 2
+      }
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 6
+      },
+      "secondary": null
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 3
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 2
+      }
+    },
+    "Rajasthan Royals": {
+      "primary": {
+        "city": "Ahmedabad",
+        "matches": 4
+      },
+      "secondary": null
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 5
+      },
+      "secondary": null
+    },
+    "Sunrisers Hyderabad": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 4
+      },
+      "secondary": null
+    }
+  },
+  "2015": {
+    "Chennai Super Kings": {
+      "primary": {
+        "city": "Chennai",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Kolkata",
+        "matches": 2
+      }
+    },
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 2
+      }
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 6
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 2
+      }
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 8
+      },
+      "secondary": {
+        "city": "Kolkata",
+        "matches": 2
+      }
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Pune",
+        "matches": 3
+      }
+    },
+    "Rajasthan Royals": {
+      "primary": {
+        "city": "Ahmedabad",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 4
+      }
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Sunrisers Hyderabad": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Visakhapatnam",
+        "matches": 3
+      }
+    }
+  },
+  "2016": {
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Visakhapatnam",
+        "matches": 2
+      }
+    },
+    "Gujarat Lions": {
+      "primary": {
+        "city": "Rajkot",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Delhi",
+        "matches": 2
+      }
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Delhi",
+        "matches": 2
+      }
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Visakhapatnam",
+        "matches": 3
+      }
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Visakhapatnam",
+        "matches": 2
+      }
+    },
+    "Rising Pune Supergiants": {
+      "primary": {
+        "city": "Pune",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Visakhapatnam",
+        "matches": 3
+      }
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 9
+      },
+      "secondary": null
+    },
+    "Sunrisers Hyderabad": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Bengaluru",
+        "matches": 2
+      }
+    }
+  },
+  "2017": {
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Gujarat Lions": {
+      "primary": {
+        "city": "Rajkot",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Kanpur",
+        "matches": 2
+      }
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Bengaluru",
+        "matches": 3
+      }
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 8
+      },
+      "secondary": {
+        "city": "Bengaluru",
+        "matches": 2
+      }
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Indore",
+        "matches": 3
+      }
+    },
+    "Rising Pune Supergiant": {
+      "primary": {
+        "city": "Pune",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 2
+      }
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 6
+      },
+      "secondary": null
+    },
+    "Sunrisers Hyderabad": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 7
+      },
+      "secondary": null
+    }
+  },
+  "2018": {
+    "Chennai Super Kings": {
+      "primary": {
+        "city": "Pune",
+        "matches": 6
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 3
+      }
+    },
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 9
+      },
+      "secondary": null
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Indore",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Chandigarh",
+        "matches": 3
+      }
+    },
+    "Rajasthan Royals": {
+      "primary": {
+        "city": "Jaipur",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Kolkata",
+        "matches": 2
+      }
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Sunrisers Hyderabad": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Mumbai",
+        "matches": 3
+      }
+    }
+  },
+  "2019": {
+    "Chennai Super Kings": {
+      "primary": {
+        "city": "Chennai",
+        "matches": 8
+      },
+      "secondary": {
+        "city": "Hyderabad",
+        "matches": 2
+      }
+    },
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Visakhapatnam",
+        "matches": 2
+      }
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Hyderabad",
+        "matches": 2
+      }
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Rajasthan Royals": {
+      "primary": {
+        "city": "Jaipur",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Sunrisers Hyderabad": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 7
+      },
+      "secondary": null
+    }
+  },
+  "2023": {
+    "Chennai Super Kings": {
+      "primary": {
+        "city": "Chennai",
+        "matches": 8
+      },
+      "secondary": {
+        "city": "Ahmedabad",
+        "matches": 2
+      }
+    },
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Gujarat Titans": {
+      "primary": {
+        "city": "Ahmedabad",
+        "matches": 9
+      },
+      "secondary": null
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Lucknow Super Giants": {
+      "primary": {
+        "city": "Lucknow",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Chennai",
+        "matches": 2
+      }
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Ahmedabad",
+        "matches": 2
+      }
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Dharamsala",
+        "matches": 2
+      }
+    },
+    "Rajasthan Royals": {
+      "primary": {
+        "city": "Jaipur",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Guwahati",
+        "matches": 2
+      }
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Sunrisers Hyderabad": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 7
+      },
+      "secondary": null
+    }
+  },
+  "2024": {
+    "Chennai Super Kings": {
+      "primary": {
+        "city": "Chennai",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Visakhapatnam",
+        "matches": 2
+      }
+    },
+    "Gujarat Titans": {
+      "primary": {
+        "city": "Ahmedabad",
+        "matches": 6
+      },
+      "secondary": null
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Chennai",
+        "matches": 2
+      }
+    },
+    "Lucknow Super Giants": {
+      "primary": {
+        "city": "Lucknow",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Dharamsala",
+        "matches": 2
+      }
+    },
+    "Rajasthan Royals": {
+      "primary": {
+        "city": "Jaipur",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Chennai",
+        "matches": 2
+      }
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Ahmedabad",
+        "matches": 2
+      }
+    },
+    "Sunrisers Hyderabad": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 6
+      },
+      "secondary": {
+        "city": "Chennai",
+        "matches": 3
+      }
+    }
+  },
+  "2025": {
+    "Chennai Super Kings": {
+      "primary": {
+        "city": "Chennai",
+        "matches": 6
+      },
+      "secondary": null
+    },
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Visakhapatnam",
+        "matches": 2
+      }
+    },
+    "Gujarat Titans": {
+      "primary": {
+        "city": "Ahmedabad",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Delhi",
+        "matches": 2
+      }
+    },
+    "Lucknow Super Giants": {
+      "primary": {
+        "city": "Lucknow",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 7
+      },
+      "secondary": {
+        "city": "Ahmedabad",
+        "matches": 2
+      }
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Ahmedabad",
+        "matches": 3
+      }
+    },
+    "Rajasthan Royals": {
+      "primary": {
+        "city": "Jaipur",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Guwahati",
+        "matches": 2
+      }
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Chandigarh",
+        "matches": 2
+      }
+    },
+    "Sunrisers Hyderabad": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 6
+      },
+      "secondary": {
+        "city": "Lucknow",
+        "matches": 2
+      }
+    }
+  },
+  "2026": {
+    "Chennai Super Kings": {
+      "primary": {
+        "city": "Chennai",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Delhi Capitals": {
+      "primary": {
+        "city": "Delhi",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Gujarat Titans": {
+      "primary": {
+        "city": "Ahmedabad",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Kolkata Knight Riders": {
+      "primary": {
+        "city": "Kolkata",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Lucknow Super Giants": {
+      "primary": {
+        "city": "Lucknow",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Mumbai Indians": {
+      "primary": {
+        "city": "Mumbai",
+        "matches": 7
+      },
+      "secondary": null
+    },
+    "Punjab Kings": {
+      "primary": {
+        "city": "Chandigarh",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Dharamsala",
+        "matches": 3
+      }
+    },
+    "Rajasthan Royals": {
+      "primary": {
+        "city": "Jaipur",
+        "matches": 4
+      },
+      "secondary": {
+        "city": "Guwahati",
+        "matches": 3
+      }
+    },
+    "Royal Challengers Bengaluru": {
+      "primary": {
+        "city": "Bengaluru",
+        "matches": 5
+      },
+      "secondary": {
+        "city": "Raipur",
+        "matches": 2
+      }
+    },
+    "Sunrisers Hyderabad": {
+      "primary": {
+        "city": "Hyderabad",
+        "matches": 7
+      },
+      "secondary": null
+    }
+  }
+}

@@ -40,9 +40,11 @@ IPL season is live. India's data community is engaged. Build a public, AI-augmen
 |-----------|--------|-------|
 | AWS infra (S3, Glue, Athena, Lambda, API Gateway, CloudFront) | Deployed | CDK stack, ap-south-1 |
 | SQL query interface | Live | [d35f2okpod3reh.cloudfront.net](https://d35f2okpod3reh.cloudfront.net) |
-| Match-level data | 1,169 rows | 2008-2025, Parquet in S3 |
+| Match-level data | 1,172 rows | 2008-2026, Parquet in S3 |
+| Daily data pipeline | Running locally | 3 scripts: CricAPI schedule, Cricsheet match data, pre-match analysis |
+| Pre-match analysis tab | Live | H2H, venue record, toss factor, recent form |
 | Ball-by-ball data | Available locally | Not yet uploaded/processed |
-| React + Vite frontend | Deployed | Single-page SQL editor, minimal UI |
+| React + Vite frontend | Deployed | Two-tab SPA: pre-match analysis + SQL query engine |
 
 ---
 
@@ -64,7 +66,7 @@ Priorities will change almost every week as we see what's easy, what's hard, wha
   - Venue performance
   - Powerplay / middle overs / death overs splits
 - [ ] Redesign frontend from SQL editor to a real analytics interface
-- [ ] Pre-match analysis cards from historical data (H2H, venue, form, toss)
+- [x] Pre-match analysis cards from historical data (H2H, venue, form, toss) — shipped Mar 31
 - [ ] Mobile-responsive layout
 - [ ] Deep ball-by-ball analytics (phase-wise performance, player matchups) — week 3
 - [ ] 6-8 interactive visualizations, each designed to also be a LinkedIn post:

@@ -1,0 +1,112 @@
+[
+  {
+    "name": "Chennai Super Kings",
+    "short": "CSK",
+    "other_names": [],
+    "active": true,
+    "first_season": 2008
+  },
+  {
+    "name": "Delhi Capitals",
+    "short": "DC",
+    "other_names": ["Delhi Daredevils"],
+    "active": true,
+    "first_season": 2008
+  },
+  {
+    "name": "Gujarat Titans",
+    "short": "GT",
+    "other_names": [],
+    "active": true,
+    "first_season": 2022
+  },
+  {
+    "name": "Kolkata Knight Riders",
+    "short": "KKR",
+    "other_names": [],
+    "active": true,
+    "first_season": 2008
+  },
+  {
+    "name": "Lucknow Super Giants",
+    "short": "LSG",
+    "other_names": [],
+    "active": true,
+    "first_season": 2022
+  },
+  {
+    "name": "Mumbai Indians",
+    "short": "MI",
+    "other_names": [],
+    "active": true,
+    "first_season": 2008
+  },
+  {
+    "name": "Punjab Kings",
+    "short": "PBKS",
+    "other_names": ["Kings XI Punjab"],
+    "active": true,
+    "first_season": 2008
+  },
+  {
+    "name": "Rajasthan Royals",
+    "short": "RR",
+    "other_names": [],
+    "active": true,
+    "first_season": 2008
+  },
+  {
+    "name": "Royal Challengers Bengaluru",
+    "short": "RCB",
+    "other_names": ["Royal Challengers Bangalore"],
+    "active": true,
+    "first_season": 2008
+  },
+  {
+    "name": "Sunrisers Hyderabad",
+    "short": "SRH",
+    "other_names": [],
+    "active": true,
+    "first_season": 2013
+  },
+  {
+    "name": "Deccan Chargers",
+    "short": "DC",
+    "other_names": [],
+    "active": false,
+    "first_season": 2008,
+    "last_season": 2012
+  },
+  {
+    "name": "Gujarat Lions",
+    "short": "GL",
+    "other_names": [],
+    "active": false,
+    "first_season": 2016,
+    "last_season": 2017
+  },
+  {
+    "name": "Kochi Tuskers Kerala",
+    "short": "KTK",
+    "other_names": [],
+    "active": false,
+    "first_season": 2011,
+    "last_season": 2011
+  },
+  {
+    "name": "Pune Warriors",
+    "short": "PWI",
+    "other_names": ["Pune Warriors India"],
+    "active": false,
+    "first_season": 2011,
+    "last_season": 2013
+  },
+  {
+    "name": "Rising Pune Supergiant",
+    "short": "RPS",
+    "other_names": ["Rising Pune Supergiants"],
+    "active": false,
+    "first_season": 2016,
+    "last_season": 2017
+  }
+]
