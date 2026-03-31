@@ -282,3 +282,17 @@ Priorities will shift weekly. The weekly plan has 4-6 concrete items per week �
 ---
 
 *This is a living document. Update it as decisions are made and priorities shift.*
+
+---
+
+## Frontend Theme — CricInfo-Inspired (Applied Mar 31, 2026)
+
+- **Nav bar:** Cerulean blue gradient header (`#0398DC`) with white text, cricket ball icon, match count badges
+- **Backgrounds:** Light gray (`#F2F3F5`) page, white cards — clean editorial look
+- **Typography:** DM Sans for body, JetBrains Mono for code/SQL
+- **Tables:** White with blue header accent stripe, alternating row tint, blue sort indicators
+- **Query builder:** Card-based layout with header bar, example pills along the bottom, blue gradient "Run Query" button
+- **Breadcrumb strip:** `Stats / IPL / Query Builder` under nav
+- **Error states:** Soft red card with proper icon
+- **Animations:** Subtle fade-in on load, slide-down on schema expand
+- **CSS variables** for full theme consistency
