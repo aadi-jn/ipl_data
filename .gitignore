@@ -10,6 +10,15 @@ __pycache__
 .cdk.staging
 cdk.out
 
+# Large data files — source of truth is S3
+data_modeling/ball_by_ball.csv
+data_modeling/ball_by_ball.parquet
+data_modeling/batter_scorecard.csv
+data_modeling/batter_scorecard.parquet
+data_modeling/match_info.csv
+data_modeling/match_info.parquet
+data_modeling/*.ipynb
+
 # dbt — never commit real profiles or compiled artefacts
 profiles.yml
 ipl_dbt/target/
