@@ -1,0 +1,109 @@
+name: Daily IPL Pipeline
+
+on:
+  schedule:
+    - cron: '30 0 * * *'   # 00:30 UTC = 06:00 IST
+  workflow_dispatch:        # manual trigger for testing
+
+permissions:
+  id-token: write           # required for OIDC
+  contents: read
+
+env:
+  AWS_REGION: ap-south-1
+  PROCESSED_BUCKET: ipl-processed-data-814871720600
+  FRONTEND_BUCKET: ipl-frontend-814871720600
+  CLOUDFRONT_DISTRIBUTION_ID: E3OPF5PBRU90E9
+
+jobs:
+  pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      # ── 1. Ingest new match data ──────────────────────────────────────────
+      - name: Invoke ingestion Lambda
+        run: |
+          aws lambda invoke \
+            --function-name ipl-ingestion \
+            --invocation-type RequestResponse \
+            --log-type Tail \
+            --payload '{}' \
+            /tmp/lambda_response.json \
+            --query 'LogResult' --output text | base64 -d || true
+          echo "Lambda response:"
+          cat /tmp/lambda_response.json
+
+      # ── 2. dbt ───────────────────────────────────────────────────────────
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dbt
+        run: pip install dbt-core==1.11.7 dbt-athena-community==1.10.0
+
+      - name: Create dbt profiles
+        run: |
+          mkdir -p ~/.dbt
+          cat > ~/.dbt/profiles.yml << 'EOF'
+          ipl_dbt:
+            target: prod
+            outputs:
+              prod:
+                type: athena
+                region_name: ap-south-1
+                s3_staging_dir: s3://ipl-athena-results-814871720600/dbt/
+                s3_data_dir: s3://ipl-processed-data-814871720600/dbt/
+                database: AwsDataCatalog
+                schema: dbt_prod
+                work_group: ipl-workgroup
+          EOF
+
+      - name: dbt seed
+        working-directory: ipl_dbt
+        run: dbt seed --target prod
+
+      - name: dbt run
+        working-directory: ipl_dbt
+        run: dbt run --target prod
+
+      - name: dbt test
+        working-directory: ipl_dbt
+        run: dbt test --target prod
+
+      # ── 3. Pre-match analysis ─────────────────────────────────────────────
+      - name: Download fresh match_info.csv from S3
+        run: |
+          aws s3 cp \
+            s3://${{ env.PROCESSED_BUCKET }}/csv/match_info.csv \
+            data_modeling/match_info.csv
+
+      - name: Install script dependencies
+        run: pip install pyyaml
+
+      - name: Generate pre-match JSON
+        run: python3 data_sources/generate_prematch.py
+
+      # ── 4. Deploy prematch.json ───────────────────────────────────────────
+      - name: Upload prematch.json to S3
+        run: |
+          aws s3 cp frontend/public/prematch.json \
+            s3://${{ env.FRONTEND_BUCKET }}/prematch.json \
+            --content-type application/json \
+            --cache-control "max-age=3600"
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ env.CLOUDFRONT_DISTRIBUTION_ID }} \
+            --paths "/prematch.json"

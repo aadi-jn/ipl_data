@@ -1,0 +1,30 @@
+-- Thin select over raw batter_scorecard: cast types.
+select
+    cast(match_id as bigint)                        as match_id,
+    try(date_parse(date, '%Y-%m-%d'))               as match_date,
+    date                                            as match_date_str,
+    venue,
+    city,
+    cast(season as varchar)                         as season,
+    batting_team,
+    bowling_team,
+    cast(innings as integer)                        as innings,
+    batter,
+    cast(entry_score as integer)                    as entry_score,
+    cast(entry_wickets as integer)                  as entry_wickets,
+    cast(entry_over as integer)                     as entry_over,
+    entry_bowler,
+    cast(runs_after_5_balls as integer)             as runs_after_5_balls,
+    cast(runs_after_10_balls as integer)            as runs_after_10_balls,
+    cast(runs_after_20_balls as integer)            as runs_after_20_balls,
+    cast(runs_after_30_balls as integer)            as runs_after_30_balls,
+    cast(runs_after_40_balls as integer)            as runs_after_40_balls,
+    cast(runs_after_50_balls as integer)            as runs_after_50_balls,
+    cast(total_runs as integer)                     as total_runs,
+    cast(total_balls_faced as integer)              as total_balls_faced,
+    cast(out as boolean)                            as out,
+    dismissal_kind,
+    dismissal_bowler,
+    dismissal_fielder
+from {{ source('ipl_cricket', 'batter_scorecard') }}
+where match_id is not null

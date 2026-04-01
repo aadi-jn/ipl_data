@@ -1,5 +1,6 @@
 from aws_cdk import (
     Duration,
+    Size,
     Stack,
     RemovalPolicy,
     CfnOutput,
@@ -128,6 +129,114 @@ class IplStack(Stack):
         )
         matches_table.add_dependency(glue_db)
 
+        # -- deliveries (ball_by_ball) table --
+        deliveries_table = glue.CfnTable(
+            self, "DeliveriesTable",
+            catalog_id=self.account,
+            database_name="ipl_cricket",
+            table_input=glue.CfnTable.TableInputProperty(
+                name="deliveries",
+                description="IPL ball-by-ball delivery data",
+                table_type="EXTERNAL_TABLE",
+                parameters={
+                    "classification": "parquet",
+                    "compressionType": "snappy",
+                },
+                storage_descriptor=glue.CfnTable.StorageDescriptorProperty(
+                    location=f"{processed_location}/deliveries/",
+                    input_format="org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+                    output_format="org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+                    serde_info=glue.CfnTable.SerdeInfoProperty(
+                        serialization_library="org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+                        parameters={"serialization.format": "1"},
+                    ),
+                    columns=[
+                        glue.CfnTable.ColumnProperty(name="match_id", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="date", type="string"),
+                        glue.CfnTable.ColumnProperty(name="venue", type="string"),
+                        glue.CfnTable.ColumnProperty(name="city", type="string"),
+                        glue.CfnTable.ColumnProperty(name="team1", type="string"),
+                        glue.CfnTable.ColumnProperty(name="team2", type="string"),
+                        glue.CfnTable.ColumnProperty(name="season", type="string"),
+                        glue.CfnTable.ColumnProperty(name="innings", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="batting_team", type="string"),
+                        glue.CfnTable.ColumnProperty(name="bowling_team", type="string"),
+                        glue.CfnTable.ColumnProperty(name="over", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="ball", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="batter", type="string"),
+                        glue.CfnTable.ColumnProperty(name="bowler", type="string"),
+                        glue.CfnTable.ColumnProperty(name="non_striker", type="string"),
+                        glue.CfnTable.ColumnProperty(name="batter_runs", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="extras_total", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="total_runs", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="wides", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="noballs", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="byes", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="legbyes", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="penalty", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="is_wicket", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="player_out", type="string"),
+                        glue.CfnTable.ColumnProperty(name="dismissal_kind", type="string"),
+                        glue.CfnTable.ColumnProperty(name="fielder", type="string"),
+                    ],
+                ),
+            ),
+        )
+        deliveries_table.add_dependency(glue_db)
+
+        # -- batter_scorecard table --
+        scorecard_table = glue.CfnTable(
+            self, "BatterScorecardTable",
+            catalog_id=self.account,
+            database_name="ipl_cricket",
+            table_input=glue.CfnTable.TableInputProperty(
+                name="batter_scorecard",
+                description="IPL per-match batter scorecard",
+                table_type="EXTERNAL_TABLE",
+                parameters={
+                    "classification": "parquet",
+                    "compressionType": "snappy",
+                },
+                storage_descriptor=glue.CfnTable.StorageDescriptorProperty(
+                    location=f"{processed_location}/batter_scorecard/",
+                    input_format="org.apache.hadoop.hive.ql.io.parquet.MapredParquetInputFormat",
+                    output_format="org.apache.hadoop.hive.ql.io.parquet.MapredParquetOutputFormat",
+                    serde_info=glue.CfnTable.SerdeInfoProperty(
+                        serialization_library="org.apache.hadoop.hive.ql.io.parquet.serde.ParquetHiveSerDe",
+                        parameters={"serialization.format": "1"},
+                    ),
+                    columns=[
+                        glue.CfnTable.ColumnProperty(name="match_id", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="date", type="string"),
+                        glue.CfnTable.ColumnProperty(name="venue", type="string"),
+                        glue.CfnTable.ColumnProperty(name="city", type="string"),
+                        glue.CfnTable.ColumnProperty(name="season", type="string"),
+                        glue.CfnTable.ColumnProperty(name="batting_team", type="string"),
+                        glue.CfnTable.ColumnProperty(name="bowling_team", type="string"),
+                        glue.CfnTable.ColumnProperty(name="innings", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="batter", type="string"),
+                        glue.CfnTable.ColumnProperty(name="entry_score", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="entry_wickets", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="entry_over", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="entry_bowler", type="string"),
+                        glue.CfnTable.ColumnProperty(name="runs_after_5_balls", type="double"),
+                        glue.CfnTable.ColumnProperty(name="runs_after_10_balls", type="double"),
+                        glue.CfnTable.ColumnProperty(name="runs_after_20_balls", type="double"),
+                        glue.CfnTable.ColumnProperty(name="runs_after_30_balls", type="double"),
+                        glue.CfnTable.ColumnProperty(name="runs_after_40_balls", type="double"),
+                        glue.CfnTable.ColumnProperty(name="runs_after_50_balls", type="double"),
+                        glue.CfnTable.ColumnProperty(name="total_runs", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="total_balls_faced", type="bigint"),
+                        glue.CfnTable.ColumnProperty(name="out", type="boolean"),
+                        glue.CfnTable.ColumnProperty(name="dismissal_kind", type="string"),
+                        glue.CfnTable.ColumnProperty(name="dismissal_bowler", type="string"),
+                        glue.CfnTable.ColumnProperty(name="dismissal_fielder", type="string"),
+                    ],
+                ),
+            ),
+        )
+        scorecard_table.add_dependency(glue_db)
+
         # -------------------------------------------------------
         # Athena Workgroup
         # -------------------------------------------------------
@@ -143,6 +252,47 @@ class IplStack(Stack):
                 ),
                 enforce_work_group_configuration=True,
             ),
+        )
+
+        # -------------------------------------------------------
+        # Lambda — ipl-ingestion
+        # -------------------------------------------------------
+
+        ingestion_role = iam.Role(
+            self, "IngestionRole",
+            assumed_by=iam.ServicePrincipal("lambda.amazonaws.com"),
+            managed_policies=[
+                iam.ManagedPolicy.from_aws_managed_policy_name(
+                    "service-role/AWSLambdaBasicExecutionRole"
+                ),
+            ],
+        )
+
+        # S3: read + write processed data (match_info, deliveries, scorecard)
+        ingestion_role.add_to_policy(iam.PolicyStatement(
+            actions=[
+                "s3:GetObject",
+                "s3:PutObject",
+                "s3:ListBucket",
+                "s3:GetBucketLocation",
+            ],
+            resources=[
+                processed_bucket.bucket_arn,
+                f"{processed_bucket.bucket_arn}/*",
+            ],
+        ))
+
+        ingestion_fn = lambda_.DockerImageFunction(
+            self, "Ingestion",
+            function_name="ipl-ingestion",
+            code=lambda_.DockerImageCode.from_image_asset("lambda/ingestion"),
+            role=ingestion_role,
+            timeout=Duration.minutes(5),
+            memory_size=1024,
+            ephemeral_storage_size=Size.mebibytes(1024),
+            environment={
+                "PROCESSED_BUCKET": processed_bucket.bucket_name,
+            },
         )
 
         # -------------------------------------------------------
@@ -309,6 +459,7 @@ class IplStack(Stack):
         CfnOutput(self, "AthenaResultsBucket", value=athena_results_bucket.bucket_name)
         CfnOutput(self, "GlueDatabase", value="ipl_cricket")
         CfnOutput(self, "AthenaWorkgroup", value="ipl-workgroup")
+        CfnOutput(self, "IngestionFunction", value=ingestion_fn.function_name)
         CfnOutput(self, "QueryRunnerFunction", value=query_runner_fn.function_name)
         CfnOutput(self, "ApiEndpoint", value=f"{api.url}query")
         CfnOutput(self, "CloudFrontUrl", value=f"https://{distribution.distribution_domain_name}")

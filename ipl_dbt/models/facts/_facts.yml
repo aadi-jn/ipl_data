@@ -1,0 +1,22 @@
+version: 2
+
+models:
+  - name: fct_matches
+    description: "Match facts with normalised team names and city — primary grain is one row per match"
+    columns:
+      - name: filename
+        tests: [not_null, unique]
+      - name: team1
+        tests: [not_null]
+      - name: team2
+        tests: [not_null]
+
+  - name: fct_deliveries
+    description: "Delivery facts with normalised teams and phase label"
+    columns:
+      - name: match_id
+        tests: [not_null]
+      - name: phase
+        tests:
+          - accepted_values:
+              values: ['Powerplay', 'Middle', 'Death', 'Unknown']

@@ -1,0 +1,30 @@
+version: 2
+
+models:
+  - name: stg_matches
+    description: "Typed match-level data — one row per match"
+    columns:
+      - name: filename
+        tests: [not_null, unique]
+      - name: match_date
+        tests: [not_null]
+      - name: team1
+        tests: [not_null]
+      - name: team2
+        tests: [not_null]
+
+  - name: stg_deliveries
+    description: "Typed ball-by-ball deliveries with phase label"
+    columns:
+      - name: match_id
+        tests: [not_null]
+      - name: phase
+        tests:
+          - accepted_values:
+              values: ['Powerplay', 'Middle', 'Death', 'Unknown']
+
+  - name: stg_batter_scorecard
+    description: "Typed batter scorecard with entry context and milestone runs"
+    columns:
+      - name: match_id
+        tests: [not_null]

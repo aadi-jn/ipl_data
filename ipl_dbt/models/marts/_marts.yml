@@ -1,0 +1,35 @@
+version: 2
+
+models:
+  - name: mart_player_career_stats
+    description: "Batter stats by season — runs, SR, average, 50s, 100s"
+    columns:
+      - name: batter
+        tests: [not_null]
+      - name: season
+        tests: [not_null]
+
+  - name: mart_team_season_stats
+    description: "Team win/loss record per season with win percentage"
+    columns:
+      - name: team
+        tests: [not_null]
+      - name: season
+        tests:
+          - not_null:
+              config:
+                severity: warn   # some historical Cricsheet records have no season field
+
+  - name: mart_venue_stats
+    description: "Venue-level toss stats and batting-first vs fielding-first win rates"
+    columns:
+      - name: venue
+        tests: [not_null]
+
+  - name: mart_phase_stats
+    description: "Phase-level (Powerplay/Middle/Death) batting stats per team per season"
+    columns:
+      - name: phase
+        tests:
+          - accepted_values:
+              values: ['Powerplay', 'Middle', 'Death', 'Unknown']

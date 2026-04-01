@@ -1,0 +1,31 @@
+version: 2
+
+sources:
+  - name: ipl_cricket
+    database: AwsDataCatalog   # Athena catalog name
+    schema: ipl_cricket        # Glue database
+    description: "Raw IPL data in Glue catalog — matches, deliveries, batter scorecards"
+    tables:
+      - name: matches
+        description: "Match-level data: teams, venue, toss, result (1,172 rows, 2008-2026)"
+        columns:
+          - name: filename
+            tests: [not_null, unique]
+          - name: date
+            tests: [not_null]
+          - name: team1
+            tests: [not_null]
+          - name: team2
+            tests: [not_null]
+
+      - name: deliveries
+        description: "Ball-by-ball delivery data across all IPL matches"
+        columns:
+          - name: match_id
+            tests: [not_null]
+
+      - name: batter_scorecard
+        description: "Per-match batter scorecard with entry context and milestone scores"
+        columns:
+          - name: match_id
+            tests: [not_null]

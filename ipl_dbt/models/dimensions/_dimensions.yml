@@ -1,0 +1,21 @@
+version: 2
+
+models:
+  - name: dim_teams
+    description: "Team name lookup — maps historical franchise names to canonical current names"
+    columns:
+      - name: raw_name
+        tests: [not_null, unique]
+      - name: canonical_name
+        tests: [not_null]
+
+  - name: dim_venues
+    description: "Venue/city lookup — maps city aliases to canonical city names"
+    columns:
+      - name: venue
+        tests: [not_null]
+      - name: canonical_city
+        tests:
+          - not_null:
+              config:
+                severity: warn   # 2 venues in source have no city recorded
