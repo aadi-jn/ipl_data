@@ -41,6 +41,17 @@ jobs:
             --query 'LogResult' --output text | base64 -d || true
           echo "Lambda response:"
           cat /tmp/lambda_response.json
+          NEW_MATCHES=$(cat /tmp/lambda_response.json | python3 -c "import sys,json; d=json.load(sys.stdin); b=json.loads(d.get('body','{}')); print(b.get('new_matches_added',0))" 2>/dev/null || echo "?")
+          NEW_DELIVERIES=$(cat /tmp/lambda_response.json | python3 -c "import sys,json; d=json.load(sys.stdin); b=json.loads(d.get('body','{}')); print(b.get('new_deliveries_added',0))" 2>/dev/null || echo "?")
+          echo "### Ingestion summary" >> $GITHUB_STEP_SUMMARY
+          echo "- New matches added: **${NEW_MATCHES}**" >> $GITHUB_STEP_SUMMARY
+          echo "- New deliveries added: **${NEW_DELIVERIES}**" >> $GITHUB_STEP_SUMMARY
+
+      - name: Print pipeline run log (latest entry)
+        run: |
+          aws s3 cp s3://${{ env.PROCESSED_BUCKET }}/pipeline_runs.log /tmp/pipeline_runs.log || true
+          echo "=== Latest pipeline run log entry ==="
+          head -60 /tmp/pipeline_runs.log || echo "No log yet"
 
       # ── 2. dbt ───────────────────────────────────────────────────────────
       - name: Set up Python

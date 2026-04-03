@@ -12,6 +12,7 @@ from aws_cdk import (
     aws_apigateway as apigw,
     aws_cloudfront as cloudfront,
     aws_cloudfront_origins as origins,
+    aws_ecr_assets,
 )
 from constructs import Construct
 
@@ -285,7 +286,10 @@ class IplStack(Stack):
         ingestion_fn = lambda_.DockerImageFunction(
             self, "Ingestion",
             function_name="ipl-ingestion",
-            code=lambda_.DockerImageCode.from_image_asset("lambda/ingestion"),
+            code=lambda_.DockerImageCode.from_image_asset(
+                "lambda/ingestion",
+                platform=aws_ecr_assets.Platform.LINUX_AMD64,
+            ),
             role=ingestion_role,
             timeout=Duration.minutes(5),
             memory_size=1024,
