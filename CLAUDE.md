@@ -2,6 +2,10 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Working Style
+
+The user is a non-developer (analytics background). When making technical decisions — architecture, library choices, deployment strategies, tradeoffs — explain the options clearly and recommend the best path rather than assuming the user will know. Flag when something needs cleanup (unused code, stale config, missing tests) rather than leaving it silently. Prioritize correctness, simplicity, and keeping the codebase tidy.
+
 ## What This Is
 
 Serverless IPL cricket analytics platform: users write SQL queries against IPL match data via a web UI, which runs them through Lambda → Athena → Parquet on S3. Deployed in `ap-south-1` (Mumbai). Live at https://d35f2okpod3reh.cloudfront.net.
@@ -15,9 +19,10 @@ React SPA (Vite + Tailwind) → CloudFront → API Gateway (POST /query) → Lam
 - **CDK stack**: `ipl/ipl_stack.py` — all AWS resources (S3 buckets, Glue catalog, Athena workgroup, Lambda, API Gateway, CloudFront)
 - **CDK entry**: `app.py` — instantiates `IplStack`, hardcoded to `ap-south-1`
 - **Lambda**: `lambda/query_runner/handler.py` — SQL validation (SELECT-only, regex-based), auto-appends `LIMIT 50`, polls Athena with exponential backoff
-- **Frontend**: `frontend/src/App.jsx` — two-tab SPA: "Today's Match" (pre-match analysis) and "Query Engine" (SQL editor)
-- **Data**: Parquet files in S3, queried via Glue table `ipl_cricket.matches` (1,172 rows, 2008-2026)
-- **Data pipeline**: Local Python scripts in `data_sources/` — run daily to fetch schedule, update match history, and generate pre-match analysis
+- **Frontend**: `frontend/src/App.jsx` — three-tab SPA: "Today's Match" (pre-match analysis), "Latest Match" (full scorecard from Athena deliveries), and "Query Engine" (SQL editor)
+- **Data**: Parquet files in S3, queried via Glue tables `ipl_cricket.matches` (1,172 rows, 2008-2026), `ipl_cricket.deliveries` (278K rows), `ipl_cricket.batter_scorecard` (17.7K rows)
+- **dbt layer**: `ipl_dbt/` — staging views → dimension tables (teams, venues) → fact tables → mart tables, all in Glue `dbt_prod` database. Full-refresh, runs in GitHub Actions daily.
+- **Data pipeline**: Lambda ingestion (Cricsheet → S3 Parquet) + dbt transforms + `generate_prematch.py` — automated daily via GitHub Actions at 00:30 UTC
 
 ## Commands
 
@@ -71,10 +76,16 @@ pytest tests/unit/test_ipl_stack.py # single test file
 - **Pre-match data**: `frontend/public/prematch.json` — static JSON loaded by frontend, regenerated daily. Includes H2H, venue record, toss analysis, recent form
 - **Team name normalization**: `generate_prematch.py` handles franchise renames (Delhi Daredevils→Capitals, Kings XI Punjab→Punjab Kings, etc.) and city aliases (Mohali/Chandigarh/New Chandigarh)
 
-## Project Docs
+## Project Docs — Update When Changing
 
-- `PROJECT.md` — full project plan, phases, architecture target state
-- `NOTES.md` — architecture decisions log and deployed resource inventory
-- `project-docs/weekly_plan.md` — week-by-week breakdown
-- `project-docs/data_format.md` — raw data format reference (Cricsheet YAML/JSON)
-- `project-docs/data_gaps.md` — known data quality issues
+| Doc | Purpose | Update when... |
+|-----|---------|----------------|
+| `PROJECT.md` | Plan, phases, "What Exists" table | New frontend feature, phase progress |
+| `NOTES.md` | Architecture decisions (append-only) | New technical decision, new AWS resource |
+| `project-docs/pipeline.md` | Pipeline steps, AWS resources, dbt models | Pipeline/dbt/infra change |
+| `project-docs/data_format.md` | Cricsheet YAML/JSON field reference | *(rarely — only if source format changes)* |
+| `data_sources/data_sources.txt` | All data tables with column schemas | New table or column |
+| `project-docs/ai_match_reports_plan.txt` | AI match report feature plan | AI report feature work |
+| `project-docs/use-cases.md` | 276 use cases by scenario | *(reference only)* |
+| `project-docs/backlog.md` | Pending improvements & tech debt | New debt/idea, or item completed |
+| `CLAUDE.md` | This file — architecture summary | New tab, table, or major feature |

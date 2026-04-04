@@ -1,0 +1,82 @@
+AI Match Report Generation — Plan
+==================================
+Created: 2026-04-02
+Target: Ready in 10 days (by 2026-04-12)
+
+CORE INSIGHT
+------------
+No training needed. LLMs already know cricket analysis patterns from training data.
+This is a retrieval + structured prompting problem, not a fine-tuning problem.
+
+DATA AVAILABLE
+--------------
+- match_info.csv: 1,172 matches (2008-2026), match-level metadata
+- ball_by_ball.csv: 278K deliveries (2017+), ball-level detail
+- batter_scorecard.csv: 17.7K batting innings, per-batter per-match
+
+ARCHITECTURE
+------------
+match ends -> data pipeline updates CSVs
+  -> Python script computes match stats (from ball_by_ball + match_info)
+  -> Stats fed as structured context into Claude/Bedrock prompt
+  -> LLM generates match report JSON
+  -> Stored in S3 as static JSON
+  -> Frontend renders it + offers "ask follow-up" via Bedrock
+
+Two pieces:
+
+1. BATCH REPORT GENERATION (offline, after each match)
+   - Python script: given a match_id, compute ~20 derived stats
+   - Stats become context for a prompt:
+     "You are an expert IPL analyst. Given the following match statistics,
+      write a detailed match report covering: summary, key moments,
+      standout performances, tactical analysis, and statistical highlights."
+   - Claude API via Bedrock (ap-south-1) generates the report
+   - Output: JSON file per match in S3
+
+2. INTERACTIVE FOLLOW-UP (live, in the frontend)
+   - User reads report, asks follow-up questions
+   - Question + match stats context -> Bedrock -> streamed response
+   - This is the "go further into any open question" layer
+
+AWS SERVICES
+------------
+Service         | Purpose                              | Cost
+Bedrock (Claude)| Report generation + follow-up Q&A    | ~$0.01-0.05/report, ~$0.01/follow-up
+Lambda          | Orchestrates stat computation + call  | Existing pattern
+S3              | Stores generated reports as JSON      | Pennies
+API Gateway     | New endpoint for follow-up Q&A        | Existing pattern
+
+No SageMaker, no training jobs, no GPU instances.
+Total incremental cost: probably under $5/month at IPL-season volume (~60 matches).
+
+STAT DERIVATION (data prep needed)
+-----------------------------------
+From ball_by_ball data, derive per match:
+
+1. Innings summary: total, wickets, overs, run rate
+2. Phase breakdown: powerplay (1-6), middle (7-15), death (16-20) — runs, wickets, SR
+3. Batting cards: runs, balls, 4s, 6s, SR per batter (batter_scorecard exists)
+4. Bowling figures: overs, runs, wickets, economy per bowler (from ball_by_ball)
+5. Partnerships: runs, balls, which wickets fell between
+6. Key moments: wicket clusters, expensive overs, momentum shifts
+7. Historical context: team H2H at venue, player averages at venue (from 1,172-match history)
+
+The LLM doesn't need to "learn" patterns from 100s of reports — it already has that
+knowledge. It needs the data for THIS specific match in structured format.
+
+10-DAY BREAKDOWN
+-----------------
+Days 1-3:  Build stat derivation engine (Python, ball_by_ball -> rich match stats dict)
+Days 4-6:  Prompt engineering + report generation script (Bedrock API, iterate on quality)
+Days 7-8:  Frontend "Match Report" tab + follow-up Q&A endpoint
+Days 9-10: Wire into daily pipeline, test with real matches, polish
+
+EXTENSIBILITY
+-------------
+Once stat-computation + prompting pattern works for match reports, same pattern for:
+- Points table data -> "playoff scenarios" analysis
+- Player career data -> "player form deep-dive"
+- Auction data -> "value-for-money" analysis
+
+Same pattern every time: compute stats -> stuff into prompt -> LLM generates insight.

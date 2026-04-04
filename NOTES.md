@@ -35,6 +35,15 @@
 - **Team name normalization**: Franchise renames (Delhi Daredevils→Capitals, Kings XI Punjab→Punjab Kings, RCB Bangalore→Bengaluru) handled in `generate_prematch.py` with alias dicts. City aliases too (Mohali/Chandigarh/New Chandigarh all map to Chandigarh).
 - **Tab-based frontend**: Added "Today's Match" as default landing tab with dropdown for double-header days. "Query Engine" tab retains all existing SQL functionality.
 
+### 2026-04-01: dbt Layer & Automated Pipeline
+- **dbt-core + dbt-athena-community**: Full model stack (staging → dimensions → facts → marts) running against Athena/Glue. dbt-athena uses `database: AwsDataCatalog` (the Athena catalog name) and `schema: dbt_dev|dbt_prod` (Glue database name). This mapping is not intuitive — `database` ≠ Glue database.
+- **Full-refresh over incremental**: All fact/mart tables are `materialized: table` (full refresh). At ~278K deliveries and ~1,200 matches, Athena CTAS rebuilds the entire dataset in under 7 seconds per model. Incremental with dbt-athena requires Iceberg tables — unnecessary complexity at this scale.
+- **Docker container Lambda**: The ingestion Lambda packages pandas + pyarrow + pyyaml (~300 MB unzipped), exceeding Lambda's 250 MB zip limit. Switched from `Code.from_asset` with bundling to `DockerImageFunction` using ECR. CDK builds and pushes the image automatically during deploy.
+- **S3 path separation**: CSV and Parquet files must be in different S3 prefixes. Athena scans all files in a table's `LOCATION` — a CSV in a Parquet table's folder causes `HIVE_BAD_DATA: Malformed Parquet file`. match_info.csv lives at `csv/match_info.csv`, Parquet at `matches/match_info.parquet`.
+- **GitHub Actions OIDC**: No hardcoded AWS keys. GitHub OIDC provider + IAM role with trust policy restricted to `repo:aadi-jn/ipl_data:*`. Only one secret needed: `AWS_ROLE_ARN`.
+- **dbt-fusion vs dbt-core**: The system has `dbt-fusion` (a separate product) at `/Users/aadi/.local/bin/dbt`. dbt-core + dbt-athena-community is in miniconda at `/Users/aadi/miniconda3/bin/dbt`. GitHub Actions installs dbt-core fresh, so no conflict in CI.
+- **Team/venue normalization via dbt seeds**: Extracted the alias dicts from `generate_prematch.py` into `dim_team_aliases.csv` and `dim_venue_aliases.csv` as dbt seeds. The `dim_teams` and `dim_venues` models join raw names to canonical names, and all downstream facts/marts use normalized values.
+
 ## Deployed Resources
 
 ### S3 Buckets
@@ -48,15 +57,27 @@
 **Frontend URL**: http://ipl-frontend-814871720600.s3-website.ap-south-1.amazonaws.com
 
 ### Glue
-- **Database**: `ipl_cricket`
-- **Tables**: `matches` (9 columns: filename, team1, team2, date, winner, win_type, win_margin, method, parsed_date)
-- `match_players` and `deliveries` tables removed (to be added when data is ready)
-- All tables point to `s3://ipl-processed-data-814871720600/<table_name>/`
+- **Database**: `ipl_cricket` — 3 raw source tables
+- **Database**: `dbt_prod` — 11 dbt-transformed tables (production pipeline)
+- **Database**: `dbt_dev` — 11 dbt-transformed tables (local development)
+- **Database**: `dbt_prod_seeds` / `dbt_dev_seeds` — seed lookup tables
 
-### Data Uploaded
-| File | S3 Path | Rows |
-|------|---------|------|
-| match_info.csv → match_info.parquet | `s3://ipl-processed-data-814871720600/matches/match_info.parquet` | 1172 (2008-2026) |
+| Glue Table | Database | S3 Location | Rows |
+|------------|----------|-------------|------|
+| `matches` | `ipl_cricket` | `matches/match_info.parquet` | 1,172 |
+| `deliveries` | `ipl_cricket` | `deliveries/ball_by_ball.parquet` | 278,205 |
+| `batter_scorecard` | `ipl_cricket` | `batter_scorecard/batter_scorecard.parquet` | ~15,000 |
+| `stg_matches` | `dbt_prod` | (view) | — |
+| `stg_deliveries` | `dbt_prod` | (view) | — |
+| `stg_batter_scorecard` | `dbt_prod` | (view) | — |
+| `dim_teams` | `dbt_prod` | `dbt/` | 19 |
+| `dim_venues` | `dbt_prod` | `dbt/` | 63 |
+| `fct_matches` | `dbt_prod` | `dbt/` | 1,172 |
+| `fct_deliveries` | `dbt_prod` | `dbt/` | 278,205 |
+| `mart_player_career_stats` | `dbt_prod` | `dbt/` | 2,783 |
+| `mart_team_season_stats` | `dbt_prod` | `dbt/` | 15 |
+| `mart_venue_stats` | `dbt_prod` | `dbt/` | 59 |
+| `mart_phase_stats` | `dbt_prod` | `dbt/` | 468 |
 
 ### Athena
 - **Workgroup**: `ipl-workgroup` → results at `s3://ipl-athena-results-814871720600/results/`
@@ -68,8 +89,27 @@
 
 ### Lambda
 - **Function**: `ipl-query-runner` (Python 3.12, 256 MB, 60s timeout)
-- **Code**: `lambda/query_runner/handler.py`
-- **IAM**: Athena query execution, S3 read (processed) + read/write (results), Glue catalog read
+  - Code: `lambda/query_runner/handler.py`
+  - IAM: Athena query execution, S3 read (processed) + read/write (results), Glue catalog read
+- **Function**: `ipl-ingestion` (Docker container via ECR, 1024 MB, 5 min timeout, 1 GB /tmp)
+  - Code: `lambda/ingestion/handler.py` + `Dockerfile`
+  - IAM: S3 read/write on processed data bucket
+  - Dependencies: pandas, pyarrow, pyyaml, boto3
+
+### ECR
+- **Repository**: `cdk-hnb659fds-container-assets-814871720600-ap-south-1` (CDK-managed)
+- Contains Docker image for `ipl-ingestion` Lambda
+
+### IAM (manual, not in CDK)
+- **Role**: `ipl-github-actions-role`
+- **Trust**: GitHub OIDC (`token.actions.githubusercontent.com`), restricted to `repo:aadi-jn/ipl_data:*`
+- **Permissions**: Athena execute, S3 read/write (processed + results + frontend), Glue catalog read/write, CloudFront invalidation, Lambda invoke (`ipl-ingestion`)
+
+### GitHub Actions
+- **Workflow**: `.github/workflows/daily_pipeline.yml`
+- **Schedule**: `cron: '30 0 * * *'` (00:30 UTC / 06:00 IST daily)
+- **Secret**: `AWS_ROLE_ARN` — ARN of `ipl-github-actions-role`
+- **Steps**: Invoke Lambda → dbt seed/run/test → download CSV → generate_prematch.py → upload prematch.json → CloudFront invalidation
 
 ### API Gateway
 - **API**: `ipl-api` (REST, stage: `prod`)
@@ -83,7 +123,7 @@
 - **Framework**: React 18 + Vite 5 + Tailwind CSS 3
 - **Source**: `frontend/src/App.jsx` (single-component SPA)
 - **Build**: `frontend/dist/` → synced to `s3://ipl-frontend-814871720600/`
-- **Features**: Two tabs — "Today's Match" (pre-match analysis with H2H, venue, toss, form) and "Query Engine" (SQL editor, sortable results table, 8 example queries, collapsible schema reference)
+- **Features**: Three tabs — "Today's Match" (pre-match analysis with H2H, venue, toss, form), "Latest Match" (full batting/bowling scorecard from Athena deliveries), and "Query Engine" (SQL editor, sortable results table, 8 example queries, collapsible schema reference)
 
 ### CloudFront
 - **Distribution ID**: `E3OPF5PBRU90E9`

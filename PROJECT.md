@@ -41,10 +41,13 @@ IPL season is live. India's data community is engaged. Build a public, AI-augmen
 | AWS infra (S3, Glue, Athena, Lambda, API Gateway, CloudFront) | Deployed | CDK stack, ap-south-1 |
 | SQL query interface | Live | [d35f2okpod3reh.cloudfront.net](https://d35f2okpod3reh.cloudfront.net) |
 | Match-level data | 1,172 rows | 2008-2026, Parquet in S3 |
-| Daily data pipeline | Running locally | 3 scripts: CricAPI schedule, Cricsheet match data, pre-match analysis |
+| Ball-by-ball data | 278K deliveries | All IPL matches 2008-2026, Parquet in S3 |
+| Batter scorecard data | 17.7K rows | Per-batter per-match, Parquet in S3 |
+| dbt layer | 11 models | Staging → dims → facts → marts, in Glue `dbt_prod` |
+| Daily data pipeline | Automated | GitHub Actions: Lambda ingestion → dbt → prematch.json → CloudFront |
 | Pre-match analysis tab | Live | H2H, venue record, toss factor, recent form |
-| Ball-by-ball data | Available locally | Not yet uploaded/processed |
-| React + Vite frontend | Deployed | Two-tab SPA: pre-match analysis + SQL query engine |
+| Latest Match scorecard tab | Live | Full batting/bowling scorecard from Athena deliveries data |
+| React + Vite frontend | Deployed | Three-tab SPA: pre-match analysis, latest match scorecard, SQL query engine |
 
 ---
 
@@ -52,19 +55,19 @@ IPL season is live. India's data community is engaged. Build a public, AI-augmen
 
 The project has three broad phases. Weeks 1-3 are about getting all the data into one place and building stable infrastructure. Around week 4, it shifts to AI-enabled features because the data is ready and tested. Beyond that, it shifts to NL queries, animated summaries, MCP connectors, and more engaging features.
 
-Priorities will change almost every week as we see what's easy, what's hard, what's needed, and what doesn't matter. See `project-docs/weekly_plan.md` for the concrete week-by-week breakdown.
+Priorities will change almost every week as we see what's easy, what's hard, what's needed, and what doesn't matter.
 
 ### Phase 1: Data Foundation & First Impressions (Weeks 1-3)
 **Goal:** All data ingested, stable infrastructure, a frontend people want to use, and pre-match analysis live.
 
-- [ ] Process and upload ball-by-ball/deliveries data to S3 (Parquet)
-- [ ] Add Glue table definitions for `deliveries` and `match_players`
-- [ ] Validate data quality — row counts, nulls, edge cases
-- [ ] Build derived tables/views:
-  - Player career stats (runs, wickets, strike rate, economy)
-  - Team season summaries
-  - Venue performance
-  - Powerplay / middle overs / death overs splits
+- [x] Process and upload ball-by-ball/deliveries data to S3 (Parquet) — 278K deliveries, shipped Apr 1
+- [x] Add Glue table definitions for `deliveries` and `batter_scorecard` — shipped Apr 1
+- [x] Validate data quality — row counts, nulls, edge cases — dbt tests: 30 pass, 2 warn
+- [x] Build derived tables/views via dbt — shipped Apr 1:
+  - Player career stats (mart_player_career_stats)
+  - Team season summaries (mart_team_season_stats)
+  - Venue performance (mart_venue_stats)
+  - Powerplay / middle overs / death overs splits (mart_phase_stats)
 - [ ] Redesign frontend from SQL editor to a real analytics interface
 - [x] Pre-match analysis cards from historical data (H2H, venue, form, toss) — shipped Mar 31
 - [ ] Mobile-responsive layout

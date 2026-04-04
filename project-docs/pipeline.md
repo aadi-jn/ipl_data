@@ -76,7 +76,9 @@ Trigger: `cron: '30 0 * * *'` (00:30 UTC) + manual dispatch
 
 All three datasets are **incremental** — only new matches are processed each run. On a typical day with 1–2 new matches, the Lambda finishes in under 60 seconds.
 
-**Lambda config**: 1 GB memory, 5 min timeout, 1 GB ephemeral storage (for zip downloads).
+**Lambda config**: Docker container image (ECR), 1 GB memory, 5 min timeout, 1 GB ephemeral storage.
+
+**Lambda deployment**: Defined in CDK as `DockerImageFunction`. Dockerfile at `lambda/ingestion/Dockerfile`. CDK builds the image locally via Docker and pushes to ECR during `cdk deploy`.
 
 ---
 
@@ -121,7 +123,14 @@ marts/ (tables — business-ready aggregations)
 - `dim_team_aliases.csv` — franchise rename map
 - `dim_venue_aliases.csv` — city alias map
 
-**dbt test results (as of first run)**:
+**dbt profiles**:
+- In GitHub Actions: `profiles.yml` is created at runtime in the workflow (see `daily_pipeline.yml`). No profile is committed.
+- Locally: copy `ipl_dbt/profiles.yml.example` to `~/.dbt/profiles.yml`. Uses `aws_profile_name: default`.
+- Key mapping: `database: AwsDataCatalog` (Athena catalog name), `schema: dbt_dev` or `dbt_prod` (Glue database for models).
+
+**Important**: The local `dbt` binary at `/Users/aadi/.local/bin/dbt` is `dbt-fusion` (different product). Use `/Users/aadi/miniconda3/bin/dbt` for `dbt-core` + `dbt-athena-community`.
+
+**dbt test results (as of 2026-04-01)**:
 - 30 PASS, 2 WARN (known source data gaps), 0 ERROR
 - Warnings: 2 Cricsheet venues with no city recorded; 15 old matches with no season field
 
@@ -150,17 +159,19 @@ marts/ (tables — business-ready aggregations)
 
 | Resource | Name | Purpose |
 |---|---|---|
-| Lambda | `ipl-ingestion` | Daily data fetch from Cricsheet |
+| Lambda | `ipl-ingestion` | Daily data fetch from Cricsheet (Docker container, ECR) |
 | Lambda | `ipl-query-runner` | Runs user SQL queries from the frontend |
+| ECR | `cdk-hnb659fds-container-assets-814871720600-ap-south-1` | Docker image for ingestion Lambda |
 | S3 | `ipl-processed-data-814871720600` | Parquet + CSV data files |
 | S3 | `ipl-frontend-814871720600` | React app + prematch.json |
 | S3 | `ipl-athena-results-814871720600` | Athena query results + dbt staging |
-| Glue DB | `ipl_cricket` | Schema for raw source tables |
-| Glue DB | `dbt_prod` | Schema for dbt-transformed tables |
-| Glue DB | `dbt_dev` | Schema for local dbt development |
+| Glue DB | `ipl_cricket` | 3 raw source tables (matches, deliveries, batter_scorecard) |
+| Glue DB | `dbt_prod` | 11 dbt-transformed tables (staging views + dims + facts + marts) |
+| Glue DB | `dbt_dev` | Same 11 tables for local dbt development |
+| Glue DB | `dbt_dev_seeds` / `dbt_prod_seeds` | Seed tables (dim_team_aliases, dim_venue_aliases) |
 | Athena workgroup | `ipl-workgroup` | Query execution config |
 | CloudFront | `E3OPF5PBRU90E9` | CDN for the frontend |
-| IAM role | `ipl-github-actions-role` | OIDC role assumed by GitHub Actions |
+| IAM role | `ipl-github-actions-role` | OIDC role assumed by GitHub Actions (manual, not in CDK) |
 
 ---
 
@@ -207,9 +218,41 @@ Go to: https://github.com/aadi-jn/ipl_data/actions → "Daily IPL Pipeline" → 
 
 ---
 
+## S3 data layout
+
+```
+s3://ipl-processed-data-814871720600/
+├── matches/match_info.parquet        ← Glue table: ipl_cricket.matches
+├── deliveries/ball_by_ball.parquet   ← Glue table: ipl_cricket.deliveries
+├── batter_scorecard/batter_scorecard.parquet  ← Glue table: ipl_cricket.batter_scorecard
+├── csv/match_info.csv                ← used by generate_prematch.py (NOT in Parquet table folder)
+└── dbt/                              ← dbt-created table data (managed by dbt-athena)
+
+s3://ipl-athena-results-814871720600/
+├── results/                          ← Athena query results (query-runner Lambda)
+└── dbt/                              ← dbt staging area for Athena CTAS
+```
+
+**Important**: CSV files must NOT be in the same S3 prefix as Parquet files. Athena scans all files in a table's location and will fail if it encounters a non-Parquet file. The `csv/` prefix is separate for this reason.
+
+---
+
+## Current status (2026-04-01)
+
+- CDK deployed: all resources provisioned including ingestion Lambda (Docker/ECR)
+- dbt dev run: 11/11 models PASS, 30/32 tests PASS (2 WARN)
+- GitHub Actions: first manual run triggered
+- GitHub secret: `AWS_ROLE_ARN` configured
+- IAM OIDC: `ipl-github-actions-role` created manually with inline policy
+- Docker Desktop installed locally (required for `cdk deploy`)
+
+---
+
 ## Known limitations / future work
 
 - `generate_prematch.py` still reads local CSVs (Step 6 deferred) — in future it should query `mart_*` tables from Athena directly
 - `ipl_2026_matches.csv` (schedule) is committed to the repo and updated manually; could be automated via CricAPI (`fetch_matches.py`) with a `CRICAPI_KEY` GitHub secret
 - dbt models are full-refresh; if the delivery dataset grows significantly, `fct_deliveries` could be made incremental with date partitioning
-- The `ipl-ingestion` Lambda requires Docker at CDK deploy time (for Python dependency bundling)
+- `ipl-ingestion` Lambda uses Docker container image — requires Docker Desktop locally for `cdk deploy`
+- `RemovalPolicy.DESTROY` on all S3 buckets — must be changed before production launch
+- `ipl-github-actions-role` IAM role was created manually in AWS console (not in CDK) — consider importing into CDK for full IaC coverage
