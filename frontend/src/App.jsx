@@ -300,6 +300,366 @@ function Stat({ label, value }) {
   )
 }
 
+async function athenaQuery(sql) {
+  const res = await fetch(API_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ query: sql }),
+  })
+  const data = await res.json()
+  if (data.error) throw new Error(data.error)
+  // Convert array-of-arrays + columns into array-of-objects
+  return data.columns
+    ? data.data.map(row =>
+        Object.fromEntries(data.columns.map((c, i) => [c, row[i]]))
+      )
+    : data
+}
+
+function formatDismissal(dismissalKind, bowler, fielder) {
+  if (!dismissalKind) return 'not out'
+  switch (dismissalKind) {
+    case 'caught': return fielder ? `c ${fielder} b ${bowler}` : `c&b ${bowler}`
+    case 'bowled': return `b ${bowler}`
+    case 'lbw': return `lbw b ${bowler}`
+    case 'stumped': return `st ${fielder} b ${bowler}`
+    case 'run out': return fielder ? `run out (${fielder})` : 'run out'
+    case 'caught and bowled': return `c&b ${bowler}`
+    case 'hit wicket': return `hit wkt b ${bowler}`
+    case 'retired hurt': return 'retired hurt'
+    case 'obstructing the field': return 'obstructing'
+    default: return dismissalKind
+  }
+}
+
+function computeScorecard(rows) {
+  const innings = {}
+
+  for (const r of rows) {
+    const inn = r.innings
+    if (!innings[inn]) {
+      innings[inn] = {
+        innings: inn,
+        batting_team: r.batting_team,
+        bowling_team: r.bowling_team,
+        batters: {},
+        bowlers: {},
+        extras: { wides: 0, noballs: 0, byes: 0, legbyes: 0 },
+        total_runs: 0,
+        total_wickets: 0,
+        last_over: 0,
+        last_ball: 0,
+      }
+    }
+    const inn_data = innings[inn]
+
+    // Innings totals
+    inn_data.total_runs += Number(r.total_runs) || 0
+    if (Number(r.is_wicket) === 1) inn_data.total_wickets += 1
+    inn_data.last_over = Math.max(inn_data.last_over, Number(r.over) || 0)
+    inn_data.last_ball = Number(r.ball) || 0
+
+    // Extras
+    inn_data.extras.wides += Number(r.wides) || 0
+    inn_data.extras.noballs += Number(r.noballs) || 0
+    inn_data.extras.byes += Number(r.byes) || 0
+    inn_data.extras.legbyes += Number(r.legbyes) || 0
+
+    // Batter stats (skip wide deliveries for ball count)
+    const batter = r.batter
+    if (!inn_data.batters[batter]) {
+      inn_data.batters[batter] = { name: batter, runs: 0, balls: 0, fours: 0, sixes: 0, dismissal: null, order: Object.keys(inn_data.batters).length }
+    }
+    const b = inn_data.batters[batter]
+    b.runs += Number(r.batter_runs) || 0
+    if (!Number(r.wides)) b.balls += 1
+    if (Number(r.batter_runs) === 4) b.fours += 1
+    if (Number(r.batter_runs) === 6) b.sixes += 1
+
+    // Dismissal
+    if (Number(r.is_wicket) === 1 && r.player_out) {
+      const dismissed = r.player_out
+      if (!inn_data.batters[dismissed]) {
+        inn_data.batters[dismissed] = { name: dismissed, runs: 0, balls: 0, fours: 0, sixes: 0, dismissal: null, order: Object.keys(inn_data.batters).length }
+      }
+      inn_data.batters[dismissed].dismissal = formatDismissal(r.dismissal_kind, r.bowler, r.fielder)
+    }
+
+    // Bowler stats (skip no-balls and wides for legal delivery count)
+    const bowler = r.bowler
+    if (!inn_data.bowlers[bowler]) {
+      inn_data.bowlers[bowler] = { name: bowler, runs: 0, balls: 0, wickets: 0, wides: 0, noballs: 0, maiden_overs: new Set(), over_runs: {} }
+    }
+    const bwl = inn_data.bowlers[bowler]
+    bwl.runs += Number(r.total_runs) || 0
+    if (!Number(r.wides) && !Number(r.noballs)) {
+      bwl.balls += 1
+    }
+    bwl.wides += Number(r.wides) || 0
+    bwl.noballs += Number(r.noballs) || 0
+
+    // Track runs per over for maiden detection
+    const overKey = `${r.over}`
+    if (!bwl.over_runs[overKey]) bwl.over_runs[overKey] = { runs: 0, hasExtra: false }
+    bwl.over_runs[overKey].runs += Number(r.total_runs) || 0
+    if (Number(r.wides) || Number(r.noballs)) bwl.over_runs[overKey].hasExtra = true
+
+    // Wickets (not run out, retired hurt, obstructing)
+    const nonBowlerDismissals = ['run out', 'retired hurt', 'obstructing the field']
+    if (Number(r.is_wicket) === 1 && !nonBowlerDismissals.includes(r.dismissal_kind)) {
+      bwl.wickets += 1
+    }
+  }
+
+  return Object.values(innings).map(inn => {
+    // Compute overs string
+    const lastOver = inn.last_over
+    const lastBall = inn.last_ball
+    const oversStr = lastBall === 0 ? `${lastOver}.0` : `${lastOver}.${lastBall}`
+
+    // Compute maiden overs for each bowler
+    const batters = Object.values(inn.batters).sort((a, b) => a.order - b.order)
+    const bowlers = Object.values(inn.bowlers).map(bwl => {
+      const maidens = Object.values(bwl.over_runs).filter(o => o.runs === 0 && !o.hasExtra).length
+      const overs = `${Math.floor(bwl.balls / 6)}.${bwl.balls % 6}`
+      const economy = bwl.balls > 0 ? (bwl.runs / (bwl.balls / 6)).toFixed(2) : '-'
+      return { ...bwl, overs, maidens, economy }
+    })
+
+    const totalExtras = inn.extras.wides + inn.extras.noballs + inn.extras.byes + inn.extras.legbyes
+
+    return {
+      innings: inn.innings,
+      batting_team: inn.batting_team,
+      bowling_team: inn.bowling_team,
+      batters,
+      bowlers,
+      extras: inn.extras,
+      total_runs: inn.total_runs,
+      total_wickets: inn.total_wickets,
+      overs: oversStr,
+      total_extras: totalExtras,
+    }
+  })
+}
+
+function InningsBatting({ batters }) {
+  return (
+    <div className="overflow-x-auto">
+      <table className="w-full text-sm">
+        <thead>
+          <tr style={{ borderBottom: '2px solid var(--ci-blue)' }}>
+            {['Batter', 'Dismissal', 'R', 'B', '4s', '6s', 'SR'].map(h => (
+              <th key={h} className={`py-2 text-xs font-semibold uppercase tracking-wider ${h === 'Batter' || h === 'Dismissal' ? 'text-left pr-4' : 'text-right px-2'}`}
+                style={{ color: 'var(--ci-text-muted)' }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {batters.map((b, i) => {
+            const sr = b.balls > 0 ? (b.runs / b.balls * 100).toFixed(1) : '-'
+            const notOut = !b.dismissal
+            return (
+              <tr key={b.name} style={{
+                borderBottom: '1px solid var(--ci-border-light)',
+                backgroundColor: i % 2 === 0 ? 'transparent' : 'var(--ci-surface-alt)',
+              }}>
+                <td className="py-2 pr-4 font-medium whitespace-nowrap" style={{ color: 'var(--ci-text)' }}>
+                  {b.name}{notOut && <span className="ml-1 text-xs" style={{ color: 'var(--ci-text-muted)' }}>*</span>}
+                </td>
+                <td className="py-2 pr-4 text-xs whitespace-nowrap" style={{ color: 'var(--ci-text-secondary)' }}>
+                  {notOut ? 'not out' : b.dismissal}
+                </td>
+                <td className="py-2 px-2 text-right font-semibold whitespace-nowrap" style={{ color: 'var(--ci-text)' }}>{b.runs}</td>
+                <td className="py-2 px-2 text-right whitespace-nowrap" style={{ color: 'var(--ci-text-secondary)' }}>{b.balls}</td>
+                <td className="py-2 px-2 text-right whitespace-nowrap" style={{ color: 'var(--ci-text-secondary)' }}>{b.fours}</td>
+                <td className="py-2 px-2 text-right whitespace-nowrap" style={{ color: 'var(--ci-text-secondary)' }}>{b.sixes}</td>
+                <td className="py-2 px-2 text-right whitespace-nowrap" style={{ color: 'var(--ci-text-muted)' }}>{sr}</td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function InningsBowling({ bowlers }) {
+  return (
+    <div className="overflow-x-auto mt-4">
+      <table className="w-full text-sm">
+        <thead>
+          <tr style={{ borderBottom: '1px solid var(--ci-border)' }}>
+            {['Bowler', 'O', 'M', 'R', 'W', 'Econ', 'Wd', 'Nb'].map(h => (
+              <th key={h} className={`py-2 text-xs font-semibold uppercase tracking-wider ${h === 'Bowler' ? 'text-left pr-4' : 'text-right px-2'}`}
+                style={{ color: 'var(--ci-text-muted)' }}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {bowlers.map((b, i) => (
+            <tr key={b.name} style={{
+              borderBottom: '1px solid var(--ci-border-light)',
+              backgroundColor: i % 2 === 0 ? 'transparent' : 'var(--ci-surface-alt)',
+            }}>
+              <td className="py-2 pr-4 font-medium whitespace-nowrap" style={{ color: 'var(--ci-text)' }}>{b.name}</td>
+              <td className="py-2 px-2 text-right whitespace-nowrap" style={{ color: 'var(--ci-text-secondary)' }}>{b.overs}</td>
+              <td className="py-2 px-2 text-right whitespace-nowrap" style={{ color: 'var(--ci-text-secondary)' }}>{b.maidens}</td>
+              <td className="py-2 px-2 text-right whitespace-nowrap" style={{ color: 'var(--ci-text-secondary)' }}>{b.runs}</td>
+              <td className="py-2 px-2 text-right font-semibold whitespace-nowrap" style={{ color: b.wickets >= 3 ? 'var(--ci-blue)' : 'var(--ci-text)' }}>{b.wickets}</td>
+              <td className="py-2 px-2 text-right whitespace-nowrap" style={{ color: 'var(--ci-text-muted)' }}>{b.economy}</td>
+              <td className="py-2 px-2 text-right whitespace-nowrap" style={{ color: 'var(--ci-text-muted)' }}>{b.wides || '-'}</td>
+              <td className="py-2 px-2 text-right whitespace-nowrap" style={{ color: 'var(--ci-text-muted)' }}>{b.noballs || '-'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  )
+}
+
+function LatestMatch() {
+  const [match, setMatch] = useState(null)
+  const [scorecard, setScorecard] = useState(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
+  const [status, setStatus] = useState('Fetching latest match...')
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      try {
+        setStatus('Fetching latest match...')
+        const matchRows = await athenaQuery(`
+          SELECT filename, date, team1, team2, city, venue,
+                 toss_winner, toss_decision, winner, win_type,
+                 win_margin, result, method, player_of_match
+          FROM matches
+          ORDER BY date DESC
+          LIMIT 1
+        `)
+        if (cancelled) return
+        if (!matchRows.length) throw new Error('No match data found')
+        const m = matchRows[0]
+        setMatch(m)
+
+        const matchId = parseInt(m.filename.replace('.yaml', '').replace('.json', ''))
+        if (isNaN(matchId)) throw new Error(`Could not parse match_id from filename: ${m.filename}`)
+
+        setStatus('Loading scorecard...')
+        const deliveries = await athenaQuery(`
+          SELECT innings, batting_team, bowling_team, over, ball,
+                 batter, bowler, batter_runs, extras_total, total_runs,
+                 wides, noballs, byes, legbyes, is_wicket,
+                 player_out, dismissal_kind, fielder
+          FROM deliveries
+          WHERE match_id = ${matchId}
+          ORDER BY innings, over, ball
+          LIMIT 400
+        `)
+        if (cancelled) return
+        if (!deliveries.length) throw new Error('No delivery data found for this match')
+        setScorecard(computeScorecard(deliveries))
+      } catch (e) {
+        if (!cancelled) setError(e.message)
+      } finally {
+        if (!cancelled) setLoading(false)
+      }
+    }
+    load()
+    return () => { cancelled = true }
+  }, [])
+
+  if (loading) return (
+    <div className="flex flex-col items-center justify-center py-20 rounded-lg animate-fade-in"
+      style={{ backgroundColor: 'var(--ci-surface)', border: '1px solid var(--ci-border)' }}>
+      <Spinner size="lg" />
+      <p className="mt-4 text-sm font-medium" style={{ color: 'var(--ci-text-muted)' }}>{status}</p>
+    </div>
+  )
+
+  if (error) return (
+    <div className="rounded-lg p-8 text-center animate-fade-in"
+      style={{ backgroundColor: 'var(--ci-surface)', border: '1px solid var(--ci-border)' }}>
+      <p className="text-sm font-medium" style={{ color: 'var(--ci-text-muted)' }}>Error: {error}</p>
+    </div>
+  )
+
+  const resultLine = match.winner
+    ? `${match.winner} won by ${parseInt(match.win_margin)} ${match.win_type}${match.method ? ` (${match.method})` : ''}`
+    : match.result || 'No result'
+
+  return (
+    <div className="animate-fade-in" style={{ animationDelay: '0.1s' }}>
+      {/* Match header */}
+      <div className="rounded-lg mb-5 overflow-hidden"
+        style={{
+          background: 'linear-gradient(135deg, var(--ci-blue) 0%, var(--ci-blue-dark) 100%)',
+          boxShadow: '0 2px 12px rgba(3, 152, 220, 0.25)',
+        }}>
+        <div className="px-6 py-5">
+          <span className="text-xs font-semibold uppercase tracking-wider"
+            style={{ color: 'rgba(255,255,255,0.7)' }}>
+            {match.date}
+          </span>
+          <h2 className="text-xl font-bold mt-1" style={{ color: '#fff' }}>
+            {match.team1} vs {match.team2}
+          </h2>
+          <p className="text-sm mt-1" style={{ color: 'rgba(255,255,255,0.8)' }}>
+            {match.venue}{match.city ? ` \u00b7 ${match.city}` : ''}
+          </p>
+          <p className="text-sm mt-2 font-semibold" style={{ color: 'rgba(255,255,255,0.95)' }}>
+            {resultLine}
+          </p>
+        </div>
+      </div>
+
+      {/* Innings */}
+      {scorecard.map((inn, i) => (
+        <div key={inn.innings} className="rounded-lg mb-4 overflow-hidden"
+          style={{ backgroundColor: 'var(--ci-surface)', border: '1px solid var(--ci-border)' }}>
+          {/* Innings header */}
+          <div className="px-5 py-3 flex items-center justify-between"
+            style={{ borderBottom: '1px solid var(--ci-border)', backgroundColor: 'var(--ci-surface-alt)' }}>
+            <span className="text-sm font-bold" style={{ color: 'var(--ci-text)' }}>
+              {inn.batting_team} — {i === 0 ? '1st' : '2nd'} Innings
+            </span>
+            <span className="text-sm font-semibold" style={{ color: 'var(--ci-blue)' }}>
+              {inn.total_runs}/{inn.total_wickets} ({inn.overs} ov)
+            </span>
+          </div>
+          <div className="px-5 py-4">
+            <InningsBatting batters={inn.batters} />
+            {/* Extras + Total */}
+            <div className="mt-2 pt-2 flex justify-between text-sm"
+              style={{ borderTop: '1px solid var(--ci-border-light)' }}>
+              <span style={{ color: 'var(--ci-text-secondary)' }}>
+                Extras: {inn.total_extras}
+                <span className="ml-2 text-xs" style={{ color: 'var(--ci-text-muted)' }}>
+                  (w {inn.extras.wides}, nb {inn.extras.noballs}, b {inn.extras.byes}, lb {inn.extras.legbyes})
+                </span>
+              </span>
+              <span className="font-bold" style={{ color: 'var(--ci-text)' }}>
+                Total: {inn.total_runs}/{inn.total_wickets} ({inn.overs} ov)
+              </span>
+            </div>
+            <InningsBowling bowlers={inn.bowlers} />
+          </div>
+        </div>
+      ))}
+
+      {/* Match summary */}
+      <div className="rounded-lg px-5 py-4"
+        style={{ backgroundColor: 'var(--ci-surface)', border: '1px solid var(--ci-border)' }}>
+        <h3 className="text-sm font-bold mb-3" style={{ color: 'var(--ci-text)' }}>Match Summary</h3>
+        {match.player_of_match && <Stat label="Player of the Match" value={match.player_of_match} />}
+        <Stat label="Toss" value={`${match.toss_winner} chose to ${match.toss_decision}`} />
+        {match.venue && <Stat label="Venue" value={match.venue} />}
+      </div>
+    </div>
+  )
+}
+
 export default function App() {
   const [activeTab, setActiveTab] = useState('prematch')
   const [query, setQuery] = useState(EXAMPLES[0].query)
@@ -432,6 +792,7 @@ export default function App() {
         <div className="max-w-5xl mx-auto px-6 flex gap-0">
           {[
             { id: 'prematch', label: "Today's Match" },
+            { id: 'latest', label: 'Latest Match' },
             { id: 'query', label: 'Query Engine' },
           ].map(tab => (
             <button
@@ -459,6 +820,8 @@ export default function App() {
         <div className="max-w-5xl mx-auto">
 
           {activeTab === 'prematch' && <PreMatch />}
+
+          {activeTab === 'latest' && <LatestMatch />}
 
           {activeTab === 'query' && <>
 
